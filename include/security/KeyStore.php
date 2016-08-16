@@ -18,7 +18,7 @@ class KeyStore
 
     public static function rsa_export_prv($prv_key)
     {
-        return openssl_pkey_export_to_file($prv_key, RSA_PRIVATE_KEY_LOCATION, RSA_PRIVATE_KEY_PASSPHRASE);
+        return openssl_pkey_export_to_file($prv_key, RSA_PRIVATE_KEY_LOCATION);
     }
 
     public static function rsa_export_pub($pub_key)

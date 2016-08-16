@@ -18,7 +18,7 @@ class RSA
 
     private function get_keys_from_file()
     {
-        if (!file_exists(RSA_PUBLIC_KEY_LOCATION) || file_exists(RSA_PRIVATE_KEY_LOCATION)) {
+        if (!file_exists(RSA_PUBLIC_KEY_LOCATION) || !file_exists(RSA_PRIVATE_KEY_LOCATION)) {
             return;
         }
 
@@ -53,16 +53,16 @@ class RSA
         return false;
     }
 
-    public function encrypt($text, $raw_output = false)
+    public function encrypt($text, $raw_output = false, $key = NULL)
     {
-        openssl_public_encrypt($text, $encrypted, $this->getPublicKey());
+        openssl_public_encrypt($text, $encrypted, $key == NULL ? $this->getPublicKey() : $key);
         return $raw_output ? base64_encode($encrypted) : $encrypted;
     }
 
     public function decrypt($text)
     {
         openssl_private_decrypt($text, $decrypted, $this->getPrivateKey());
-        return $decrypted;
+        return $decrypted == NULL ? openssl_error_string() : $decrypted;
     }
 
     /**

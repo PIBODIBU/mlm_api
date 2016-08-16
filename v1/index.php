@@ -9,22 +9,21 @@ require_once '../include/security/API.php';
 require_once '../include/security/RSA.php';
 require_once '../include/security/KeyStore.php';
 
-Flight::route('/login', function () {
-    // Fake input
-    $username = "QfeysZ5hauF+r2af1zCN9DbiTpLGjuKBwvPZJB1MBQNs1WwnqIzaAz75CxAZVNNl9gsDosrMmukX6jkHlZWBQ0jpVpGKGZ/MfaGdoZzR6N19oqTGpida2ngygnqUjPXtEdeqCOaDtnWQLo/GLlNxwAURuAB+isG8eV6/GVmVASZWlgxk0U6ZTkCwxIrO59j0SpfFuhBojphQNaJ1o1Wb33Vmdr/bzVH8yYYKZSArdVl7QnOyfgyqACcNhw8CdcuNaxdYfnr69Zz1kq0wIqeNtt9cr0NYl16FIGUcM4+mcj0WtAd8SBvMX8YOCWZibyPlNI9vIJCU9vO2NSi8TCGWlOwGAraUlm1aldkOtFrBpwB9EISOTFW4jmwEAr/G16lwlI3j4PRlNWV2kOTn5FdYw4+248HFPYTqy0F2eM4fHEKDIJWCS1EJPNUEiossgXUgTakY0OwMeV/AODva1BHj80KyksMflI5DKZ9t48hDhVn58BX6J6W75CAh/OkBM4LdBACbbzjFKXsojTDls3aT5XH3baSEkFHoDf+wQ8YNpfiWP89wzY484elzNuwZI97PGrPJwBD16U9Vwotz8pKEiNAN0/49ZlaVDcBLQ3yVesXVaq9J5cFcLWGIKzJoXUKvPRHH3OvPLD4X+fLWcdQ0UvrNsgnrq4IBZCxebwmBUlA=";
-    $password = "bSkwj5CgKT42mtMsdkuoEedaJNZbh8m91OBYxYkyy6Fj/gdoveyYhl17wmnGjKnghehElqenjdU2K1+aMFnCUjBRzhGL3/upltlR+/01nqaawEiklC0Z99A0c9bYOrhvCU6wJiiiYl1p8seqFcgIWNp8qh8tSRvuy+N6YMMkMpngsvmAxx+xc5KTfhRefJcOtrF7No+rtrpF6YkCCQ3mcyQivf598mT8dnrR/ItFkhy4gjr+izc1BoSoMfvUPGEcYH/dJ1hYkK9bv4CX1PZCi+cy96GVIvRYjQmfAxLvCNJbnz8uzAArWoEVGTGghG1hqTKOhOA7Ym5UUIALHnJ8Up80aW/wn/ISNJBUwJuG916pKOnPdDjdmOVmAe674vH6ZmRYb81GhNB8W5grBi5t29ABPB7TBO3g7FRYjjj/Rs5IGX+B1HqNoIoYar2WmoXpCswIUmsVXmk9AeH10QjAseSe9i7tLUvr468fqDrCxNee7lOXbTJCnmW60gpOhtX/nZtYbRaBtvVZsXnvzospN9ul0j1FCzsDuSr7tOOwsdBJc7nrgJmaqDr6U8uokr/n07Sfs2ypNOkMh0Mv/Cdz5MIxTeLQLDyL1IKeGsc6vtzvLWll76Rt5qrhC4yYJhWBMyp/JGnZZ6LZ/U0qTickLxNNfdrGY4vhVRmB7ViyOHM=";
+Flight::route('POST /login', function () {
+    verifyRequiredParams(array('username', 'password'));
+
+    $username = $_POST['username'];
+    $password = $_POST['password'];
 
     $rsa = new RSA('');
 
-    $response = array(
-        'username' => $rsa->decrypt(base64_decode($username)),
-        'password' => $rsa->decrypt(base64_decode($password)),
-
-        'api_key' => $rsa->encrypt(API::generate_key(), true),
-        'client_secret' => $rsa->encrypt(API::generate_secret(), true),
+    Flight::json(
+        $response = array(
+            'uuid' => UUID::generate_v4(),
+            'api_key' => API::generate_key(),
+            'client_secret' => API::generate_secret(),
+        )
     );
-
-    Flight::json($response);
 });
 
 Flight::route('/rsa/encrypt', function () {
@@ -44,18 +43,18 @@ Flight::route('/rsa/generate', function () {
     Flight::json($response);
 });
 
-Flight::route('/keys/public', function () {
+Flight::route('/rsa/public', function () {
     $rsa = new RSA('');
 
     $response = array(
-        'pubic_key' => $rsa->getPublicKey(),
+        'public_key' => $rsa->getPublicKey(),
     );
 
     Flight::json($response);
 });
 
 Flight::route('/test', function () {
-    $param1 = $_GET['param1'];
+    /*$param1 = $_GET['param1'];
     $param2 = $_GET['param2'];
     $param3 = $_GET['param3'];
     $sign = $_GET['sign'];
@@ -66,7 +65,10 @@ Flight::route('/test', function () {
         'matched' => hash_equals(md5($param1 . $param2 . $param3 . $client_secret), $sign)
     );
 
-    Flight::json($response);
+    Flight::json($response);*/
+    $username = "c2jZ/zI88sokFLfXsP+F2lHBEPHr0UEp5TkjcSwuh+p7LxVdOMkZUxI5CuJBf5xOviZrU/NFTNHxCJxkdkDTQRyBYAbvrlqZ+c158QsxSMR9qUONfwn2G37AC9BybFbcZd6PV2oLSSw0DT+A7SaXXOja+DbxozGqV4//cEdL23R3yVKUCVnl8I3jvRCXc8k4WTFjGlaI/d8m15YRZmzBeR56lyyBYA+MMAatQ+DiM/S25r8UoBh5e4GDbE+zGkYI9TzwF41g0TY0GVQd96dsPC7T10HuZrU/qNJq/2x4SKz0Xn3tOSlBFa7u2s+h4tKBy4NNrkHo+TPACI2eiSEfde44KYO+YlRMarod5XP/n93C83+e1HeP2Z4co20XiDXnkncka4TnDSTld6g2kEoBFmu2Ctc5ZZrlA3KBOq8G673RtqSA+Hq7GJNUQUcVKXljdvhhxw/JKIV09oiFdFANSCnj9rF7nlo+lTrsQhCJic1Vo0YU4VQLq2ebZi6dHeDu/JvH1fkxESqVQ+e2CWG7fwsD/3GdQ4ObmycLfYj5MGIt8on8kOHY7/KTiKWiUn0Z3Ja6/ilAfnoiJQ8K3pws7exDLiOVrusBSlTFz25MzOURVFuvq31nb0JvHcns+Ank7k97iWLSIp73vAOvA977yfgY/CK18ojkM2gTLuiJByM=";
+    $rsa = new RSA();
+    var_dump($rsa->decrypt(base64_decode($username)));
 });
 
 /**
@@ -93,7 +95,7 @@ function verifyRequiredParams($required_fields)
         // echo error json and stop the app
         $response = array();
         $response["error"] = true;
-        $response["message"] = 'Required field(s) ' . substr($error_fields, 0, -2) . ' is missing or empty';
+        $response["error_message"] = 'Required field(s) ' . substr($error_fields, 0, -2) . ' is missing or empty';
         Flight::json($response, 400);
     }
 }
