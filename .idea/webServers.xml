@@ -5,6 +5,14 @@
       <webServer id="f0563b90-90ed-490c-ba72-97130af4916a" name="localhost" url="http://localhost">
         <fileTransfer port="0" mountedRoot="/var/www/html" accessType="MOUNT" />
       </webServer>
+      <webServer id="0109da3d-95b1-409f-981e-c726d0e506ae" name="nauguide.esy.es" url="http://31.220.16.152">
+        <fileTransfer host="31.220.16.152" port="21" rootFolder="/public_html" password="dfdbdfdddfcfdfd8dfdedfd3df9bdf9bdf9bdf9bdf9bdf9b" username="u682172187">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+          <option name="port" value="21" />
+        </fileTransfer>
+      </webServer>
     </option>
   </component>
 </project>
