@@ -21,6 +21,11 @@ abstract class AbstractHandler
         }*/
     }
 
+    public function getAll($ignore_fields = array())
+    {
+        return array();
+    }
+
     protected function getTableName()
     {
         return '';
@@ -31,8 +36,18 @@ abstract class AbstractHandler
         return array();
     }
 
-    protected function getConnection()
+    public function getConnection()
     {
         return new mysqli();
+    }
+
+    protected function convertToObject($mysql_result)
+    {
+        return;
+    }
+
+    protected function removeIgnoreFields($mysql_result, $ignoreFields)
+    {
+        return;
     }
 }

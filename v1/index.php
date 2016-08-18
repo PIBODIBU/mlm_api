@@ -48,25 +48,29 @@ Flight::route('POST /register', function () {
         Flight::jsonError(true, "Error occurred during registration");
     }
 
-    $response = $userHandler->getUserByUUID($uuid);
-    $response = addErrorStatusToArray($response, false, "");
-
-    Flight::json($response);
+    Flight::json(addErrorStatusToArray(
+        $userHandler->getUserByUUID($uuid, false, array('username', 'password')), false, ""));
 });
 
 Flight::route('POST /login', function () {
     verifyRequiredParams(array('username', 'password'));
+    $dbSecurity = new DB_Security();
+    $userHandler = new UsersHandler(DbConnect::connect());
 
     $username = $_POST['username'];
     $password = $_POST['password'];
+    $user = $userHandler->getUserByUsername($username);
 
-    Flight::json(
-        $response = array(
-            'uuid' => UUID::generate_v4(),
-            'api_key' => API::generate_key(),
-            'client_secret' => API::generate_secret(),
-        )
-    );
+    if ($user == NULL) {
+        Flight::jsonError(true, "Bad username or password");
+    }
+
+    if (!$dbSecurity->validatePassword($password, $user['password'])) {
+        Flight::jsonError(true, "Bad username or password");
+    }
+
+    Flight::json(addErrorStatusToArray(
+        $userHandler->getUserByUUID($user['uuid'], false, array('username', 'password')), false, ""));
 });
 
 /**
@@ -78,13 +82,13 @@ Flight::route('POST /login', function () {
  */
 Flight::route('GET /users', function () {
     verifyRequiredParams(array('api_key', 'limit', 'offset', 'signature'));
+    $userHandler = new UsersHandler(DbConnect::connect());
+    $dbSecurity = new DB_Security($userHandler->getConnection());
 
     $limit = $_GET['limit'];
     $offset = $_GET['offset'];
     $apiKey = $_GET['api_key'];
     $signature = $_GET['signature'];
-
-    $dbSecurity = new DB_Security();
 
     if (!$dbSecurity->verifyUserApiKey($apiKey)) {
         Flight::jsonError(true, 'Bad api key');
@@ -94,7 +98,7 @@ Flight::route('GET /users', function () {
         Flight::jsonError(true, 'Bad signature');
     }
 
-
+    Flight::json($userHandler->getAll(array('username', 'password', 'api_key', 'client_secret', 'uuid')));
 });
 
 Flight::route('/test', function () {

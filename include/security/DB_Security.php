@@ -6,9 +6,9 @@ class DB_Security
 {
     private $connection;
 
-    public function __construct()
+    public function __construct($connection = NULL)
     {
-        $this->connection = DbConnect::connect();
+        $this->connection = $connection == NULL ? DbConnect::connect() : $connection;
     }
 
     /**
@@ -44,6 +44,11 @@ class DB_Security
         $signature = md5($signature);
 
         return hash_equals($signature, $user_signature);
+    }
+
+    public function validatePassword($user_password, $db_hash)
+    {
+        return hash_equals(md5($user_password), $db_hash);
     }
 
     /**
