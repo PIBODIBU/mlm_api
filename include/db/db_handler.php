@@ -6,9 +6,9 @@ class DbHandler
 {
     private $connection;
 
-    function __construct()
+    function __construct($connection)
     {
-        $this->connection = DbConnect::connect();
+        $this->connection = $connection == NULL ? DbConnect::connect() : $connection;
     }
 
     public function getConnection()
