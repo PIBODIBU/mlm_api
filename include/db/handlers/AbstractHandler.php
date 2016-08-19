@@ -15,10 +15,25 @@ abstract class AbstractHandler
         $sql = "INSERT INTO " . $this->getTableName() . " VALUES ($sql_values)";
 
         return $this->getConnection()->query($sql);
+    }
 
-        /*foreach ($this->getTableSchema() as $columnName) {
+    public function update($fields, $values)
+    {
+        $sql = "UPDATE users SET ";
+        $uuid = "";
 
-        }*/
+        for ($i = 0; $i < count($values); $i++) {
+            $sql .= $fields[$i] . "='" . $values[$i] . "'" . ",";
+            if ($fields[$i] == "uuid") {
+                $uuid = $values[$i];
+            }
+        }
+
+        // Remove last comma in
+        $sql = substr($sql, 0, -1);
+        $sql .= " WHERE uuid='$uuid'";
+
+        return $this->getConnection()->query($sql);
     }
 
     public function getAll($ignore_fields = array())
@@ -32,6 +47,11 @@ abstract class AbstractHandler
     }
 
     protected function getTableSchema()
+    {
+        return array();
+    }
+
+    public function getPrivateSchema()
     {
         return array();
     }

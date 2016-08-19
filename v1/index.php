@@ -23,13 +23,27 @@ Flight::map('jsonError', function ($error, $message) {
 });
 
 Flight::route('POST /register', function () {
-    verifyRequiredParams(array('name', 'surname', 'username', 'password'));
+    verifyRequiredParams(array(
+        'name',
+        'surname',
+        'email',
+        'phone',
+        'username',
+        'password',
+        'refer'
+    ));
     $userHandler = new UsersHandler(DbConnect::connect());
 
     $name = $_POST['name'];
     $surname = $_POST['surname'];
+    $email = $_POST['email'];
+    $phone = $_POST['phone'];
     $username = $_POST['username'];
     $password = $_POST['password'];
+    $refer = $_POST['refer'];
+    $createdAt = date("Y-m-d H:i:s");
+    $lastLogin = date("Y-m-d H:i:s");
+    $isOnline = 1;
 
     $uuid = UUID::generate_v4();
     $apiKey = API::generate_key();
@@ -41,8 +55,14 @@ Flight::route('POST /register', function () {
         $clientSecret,
         $name,
         $surname,
+        $email,
+        $phone,
         $username,
-        md5($password)
+        md5($password),
+        $refer,
+        $createdAt,
+        $lastLogin,
+        $isOnline
     ))
     ) {
         Flight::jsonError(true, "Error occurred during registration");
@@ -68,6 +88,11 @@ Flight::route('POST /login', function () {
     if (!$dbSecurity->validatePassword($password, $user['password'])) {
         Flight::jsonError(true, "Bad username or password");
     }
+
+    $userHandler->update(
+        array('uuid', 'is_online', 'last_login'),
+        array($user['uuid'], 1, date("Y-m-d H:i:s"))
+    );
 
     Flight::json(addErrorStatusToArray(
         $userHandler->getUserByUUID($user['uuid'], false, array('username', 'password')), false, ""));
@@ -98,7 +123,7 @@ Flight::route('GET /users', function () {
         Flight::jsonError(true, 'Bad signature');
     }
 
-    Flight::json($userHandler->getAll(array('username', 'password', 'api_key', 'client_secret', 'uuid')));
+    Flight::json($userHandler->getAll($userHandler->getPrivateSchema()));
 });
 
 Flight::route('/test', function () {

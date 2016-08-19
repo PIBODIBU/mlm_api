@@ -6,4 +6,9 @@ abstract class AbstractModel
     {
         return array();
     }
+
+    public function getPublicFields()
+    {
+        return array();
+    }
 }

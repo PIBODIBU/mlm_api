@@ -16,6 +16,26 @@ class UsersHandler extends AbstractHandler
      * OVERRIDE
      */
 
+    public function update($fields, $values)
+    {
+        $sql = "UPDATE users SET ";
+        $uuid = "";
+
+        for ($i = 0; $i < count($values); $i++) {
+            if ($fields[$i] == "uuid") {
+                $uuid = $values[$i];
+                continue;
+            }
+            $sql .= $fields[$i] . "='" . $values[$i] . "'" . ",";
+        }
+
+        // Remove last comma in
+        $sql = substr($sql, 0, -1);
+        $sql .= " WHERE uuid='$uuid'";
+
+        return $this->getConnection()->query($sql);
+    }
+
     public function getAll($ignore_fields = array())
     {
         $sql = "SELECT * FROM users";
@@ -42,8 +62,28 @@ class UsersHandler extends AbstractHandler
             'client_secret',
             'name',
             'surname',
+            'email',
+            'phone',
             'username',
             'password',
+            'refer',
+            'created_at',
+            'last_login',
+            'is_online',
+        );
+    }
+
+    public function getPrivateSchema()
+    {
+        return array(
+            'uuid',
+            'api_key',
+            'client_secret',
+            'username',
+            'password',
+            'refer',
+            'created_at',
+            'last_login',
         );
     }
 
