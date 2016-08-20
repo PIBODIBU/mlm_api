@@ -19,7 +19,7 @@ Flight::map('jsonError', function ($error, $message) {
         $response = array(
             'error' => $error,
             'error_message' => $message
-        ), 400);
+        ));
 });
 
 /**
