@@ -22,6 +22,18 @@ Flight::map('jsonError', function ($error, $message) {
         ), 400);
 });
 
+/**
+ * Get all users
+ *
+ * Required params:
+ *                  name(string),
+ *                  surname(string),
+ *                  email(string),
+ *                  phone(string),
+ *                  username(string),
+ *                  password(string),
+ *                  refer(string),
+ */
 Flight::route('POST /register', function () {
     verifyRequiredParams(array(
         'name',
