@@ -1,6 +1,6 @@
 <?php
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/projects/mlm/include/db/db_connect.php';
+require_once dirname(__DIR__) . '/db/db_connect.php';
 
 class DB_Security
 {
