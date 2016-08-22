@@ -63,7 +63,7 @@ class User extends AbstractModel
             $this->refer,
             $this->createdAt,
             $this->lastLogin,
-            $this->isOnline
+            $this->isOnline,
         );
     }
 
@@ -142,5 +142,4 @@ class User extends AbstractModel
     {
         return $this->isOnline;
     }
-
 }

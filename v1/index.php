@@ -6,6 +6,7 @@ require_once '../include/security/DB_Security.php';
 require_once '../include/utils/Request_Utils.php';
 
 require_once '../include/db/handlers/UsersHandler.php';
+require_once '../include/db/handlers/TimerHandler.php';
 require_once '../include/security/UUID.php';
 require_once '../include/security/API.php';
 
@@ -44,7 +45,10 @@ Flight::route('POST /register', function () {
         'password',
         'refer'
     ));
-    $userHandler = new UsersHandler(DbConnect::connect());
+    $dbConnection = DbConnect::connect();
+
+    $userHandler = new UsersHandler($dbConnection);
+    $timerHandler = new TimerHandler($dbConnection);
 
     $name = $_POST['name'];
     $surname = $_POST['surname'];
@@ -61,7 +65,7 @@ Flight::route('POST /register', function () {
     $apiKey = API::generate_key();
     $clientSecret = API::generate_secret();
 
-    if (!$userHandler->addItem(new User(
+    $user = new User(
         $uuid,
         $apiKey,
         $clientSecret,
@@ -75,8 +79,19 @@ Flight::route('POST /register', function () {
         $createdAt,
         $lastLogin,
         $isOnline
-    ))
-    ) {
+    );
+
+    $timer = new Timer(
+        $createdAt,
+        $uuid
+    );
+
+    if (!$userHandler->addItem($user))
+    {
+        Flight::jsonError(true, "Error occurred during registration");
+    }
+    if(!$timerHandler->addItem($timer))
+    {
         Flight::jsonError(true, "Error occurred during registration");
     }
 
@@ -139,7 +154,19 @@ Flight::route('GET /users', function () {
 });
 
 Flight::route('/test', function () {
-
 });
 
+/**
+ * Get timer of user
+ */
+Flight::route('GET /timer', function (){
+    verifyRequiredParams(array('uuid'));
+
+    $timerHandler = new TimerHandler(DbConnect::connect());
+    $dbSecurity = new DB_Security($timerHandler->getConnection());
+
+    $user_uuid = $_GET['uuid'];
+
+    Flight::json($timerHandler->getTimerByUserId($user_uuid));
+});
 Flight::start();

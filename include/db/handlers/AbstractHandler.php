@@ -36,7 +36,7 @@ abstract class AbstractHandler
         return $this->getConnection()->query($sql);
     }
 
-    public function getAll($ignore_fields = array())
+    public function getAll($ignore_fields = array(), $limit, $offset)
     {
         return array();
     }
