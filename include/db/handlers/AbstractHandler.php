@@ -1,5 +1,7 @@
 <?php
 
+require_once dirname(__DIR__) . "/../utils/Filter.php";
+
 abstract class AbstractHandler
 {
     public function addItem($item)
@@ -49,6 +51,35 @@ abstract class AbstractHandler
         }
 
         return $response;
+    }
+
+    /**
+     * Get one item from database with filtering
+     *
+     * @param Filter $filter - filter for SQL query, which contains name and value (column name & filtering value). @see Filter
+     * @param bool $convertToObject - convert result to Filter or not
+     * @param array $ignoreFields - field to delete from result
+     * @return array|mixed|null|void
+     */
+    public function get($filter, $convertToObject = false, $ignoreFields = array())
+    {
+        $filterName = $filter->getName();
+        $filterValue = $filter->getValue();
+        $sql = "SELECT * FROM " . $this->getTableName() . " WHERE BINARY $filterName='$filterValue'";
+
+        $result = $this->getConnection()->query($sql)->fetch_assoc();
+
+        if (!isset($result)) {
+            return NULL;
+        }
+
+        $result = $this->removeIgnoreFields($result, $ignoreFields);
+
+        if ($convertToObject) {
+            return $this->toObject($result);
+        } else {
+            return $result;
+        }
     }
 
     protected function getTableName()

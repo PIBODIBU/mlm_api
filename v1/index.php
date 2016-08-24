@@ -207,8 +207,12 @@ Flight::route('POST /register', function () {
 
 Flight::route('POST /login', function () {
     verifyRequiredParams(array('username', 'password'));
-    $dbSecurity = new DB_Security();
-    $userHandler = new UsersHandler(DbConnect::connect());
+
+    $dbConnection = DbConnect::connect();
+    $dbSecurity = new DB_Security($dbConnection);
+    $userHandler = new UsersHandler($dbConnection);
+    $bankInfoHandler = new BankInfoHandler($dbConnection);
+    $shippingInfoHandler = new ShippingInfoHandler($dbConnection);
 
     $username = $_POST['username'];
     $password = $_POST['password'];
@@ -222,16 +226,23 @@ Flight::route('POST /login', function () {
         Flight::jsonError(true, "Bad username or password", ERROR_BAD_USERNAME_OR_PASSWORD);
     }
 
-    $updateResult = $userHandler->update(
+    if (!$userHandler->update(
         array('is_online', 'last_login'),
         array(1, date("Y-m-d H:i:s")),
         array('uuid', $user['uuid'])
-    );
+    )
+    ) {
+        Flight::json(addErrorStatusToArray(array(), true, "Error occurred. Please, try again later.", ERROR_SERVER));
+    }
 
-    Flight::json($updateResult ?
-        addErrorStatusToArray($userHandler->getUserByUUID($user['uuid'], false, array('username', 'password')), false, "") :
-        addErrorStatusToArray(array(), true, "Error occurred. Please, try again later.", ERROR_SERVER)
-    );
+    addErrorStatusToArray(
+        $response = array(
+            'main_info' => $userHandler->getUserByUUID($user['uuid'], false, array('username', 'password')),
+            'bank_info' => $bankInfoHandler->get(new Filter('uuid', $user['uuid']), false, array('uuid')),
+            'shipping_info' => $shippingInfoHandler->get(new Filter('uuid', $user['uuid']), false, array('uuid')),
+        ), false, "");
+
+    Flight::json($response);
 });
 
 /**

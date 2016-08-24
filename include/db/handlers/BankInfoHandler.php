@@ -67,6 +67,24 @@ class BankInfoHandler extends AbstractHandler
         );
     }
 
+    public function getByToken($token, $convertToObject = false, $ignoreFields = array())
+    {
+        $sql = "SELECT * FROM " . $this->getTableName() . " WHERE BINARY token='$token'";
+        $result = $this->getConnection()->query($sql)->fetch_assoc();
+
+        if (!isset($result)) {
+            return NULL;
+        }
+
+        $result = $this->removeIgnoreFields($result, $ignoreFields);
+
+        if ($convertToObject) {
+            return $this->toObject($result);
+        } else {
+            return $result;
+        }
+    }
+
     public function isIbanOccupied($iban) : bool
     {
         $sql = "SELECT * FROM " . $this->getTableName() . " WHERE BINARY iban='$iban'";
