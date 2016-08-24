@@ -116,4 +116,11 @@ class UsersHandler extends AbstractHandler
         $result = $this->getConnection()->query($sql)->fetch_assoc();
         return isset($result);
     }
+
+    public function isUsernameOccupied($username) : bool
+    {
+        $sql = "SELECT * FROM " . $this->getTableName() . " WHERE BINARY username='$username'";
+        $result = $this->getConnection()->query($sql)->fetch_assoc();
+        return isset($result);
+    }
 }

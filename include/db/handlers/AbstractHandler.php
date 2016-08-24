@@ -34,9 +34,13 @@ abstract class AbstractHandler
         return $this->getConnection()->query($sql);
     }
 
-    public function getAll($ignore_fields = array(), $limit, $offset)
+    public function getAll($ignore_fields = array(), $limit = -1, $offset = -1)
     {
         $sql = "SELECT * FROM " . $this->getTableName();
+        if ($limit != -1 && $offset != -1) {
+            $sql .= " LIMIT $offset, $limit";
+        }
+
         $response = array();
         $result = $this->getConnection()->query($sql);
 

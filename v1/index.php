@@ -134,7 +134,22 @@ Flight::route('POST /register', function () {
 
     // Basic checks
     if ($userHandler->isEmailOccupied($email)) {
-        Flight::jsonError(TRUE, "Email address is already taken.", ERROR_EMAIL_ALREADY_TAKEN);
+        Flight::jsonError(TRUE, "Email address is already taken", ERROR_EMAIL_ALREADY_TAKEN);
+    }
+    if ($userHandler->isUsernameOccupied($username)) {
+        Flight::jsonError(TRUE, "Username is already taken", ERROR_USERNAME_ALREADY_TAKEN);
+    }
+    if ($bankInfoHandler->isIbanOccupied($bankIban)) {
+        Flight::jsonError(TRUE, "IBAN is already taken", ERROR_IBAN_ALREADY_TAKEN);
+    }
+    if ($bankInfoHandler->isSwiftCodeOccupied($bankSwiftCode)) {
+        Flight::jsonError(TRUE, "Swift code is already taken", ERROR_SWIFT_CODE_ALREADY_TAKEN);
+    }
+    if ($bankInfoHandler->isDebitCardOccupied($bankDebitCard)) {
+        Flight::jsonError(TRUE, "Debit card is already taken", ERROR_DEBIT_CARD_CODE_ALREADY_TAKEN);
+    }
+    if ($bankInfoHandler->isPersonalCodeOccupied($bankPersonalCode)) {
+        Flight::jsonError(TRUE, "Personal code is already taken", ERROR_PERSONAL_CODE_CODE_ALREADY_TAKEN);
     }
 
     $user = new User(
@@ -200,11 +215,11 @@ Flight::route('POST /login', function () {
     $user = $userHandler->getUserByUsername($username);
 
     if ($user == NULL) {
-        Flight::jsonError(true, "Bad username or password");
+        Flight::jsonError(true, "Bad username or password", ERROR_BAD_USERNAME_OR_PASSWORD);
     }
 
     if (!$dbSecurity->validatePassword($password, $user['password'])) {
-        Flight::jsonError(true, "Bad username or password");
+        Flight::jsonError(true, "Bad username or password", ERROR_BAD_USERNAME_OR_PASSWORD);
     }
 
     $updateResult = $userHandler->update(
@@ -215,7 +230,7 @@ Flight::route('POST /login', function () {
 
     Flight::json($updateResult ?
         addErrorStatusToArray($userHandler->getUserByUUID($user['uuid'], false, array('username', 'password')), false, "") :
-        addErrorStatusToArray(array(), true, "Error occurred. Please, try again later.")
+        addErrorStatusToArray(array(), true, "Error occurred. Please, try again later.", ERROR_SERVER)
     );
 });
 
@@ -237,14 +252,14 @@ Flight::route('GET /users', function () {
     $signature = $_GET['signature'];
 
     if (!$dbSecurity->verifyUserApiKey($apiKey)) {
-        Flight::jsonError(true, 'Bad api key');
+        Flight::jsonError(true, 'Bad api key', ERROR_BAD_API_KEY);
     }
 
     if (!$dbSecurity->validateSignature(array($limit, $offset), $signature, $apiKey)) {
-        Flight::jsonError(true, 'Bad signature');
+        Flight::jsonError(true, 'Bad signature', ERROR_BAD_SIGNATURE);
     }
 
-    Flight::json($userHandler->getAll($userHandler->getPrivateSchema()));
+    Flight::json($userHandler->getAll($userHandler->getPrivateSchema(), $limit, $offset));
 });
 
 Flight::route('/test', function () {

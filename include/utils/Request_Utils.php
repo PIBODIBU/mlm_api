@@ -26,10 +26,11 @@ function verifyRequiredParams($required_fields)
     }
 }
 
-function addErrorStatusToArray($array = array(), $error = false, $error_msg = "")
+function addErrorStatusToArray($array = array(), $error = false, $error_msg = "", $error_code = NO_ERROR)
 {
     $array['error'] = $error;
     $array['error_message'] = $error_msg;
+    $array['error_code'] = $error_code;
 
     return $array;
 }

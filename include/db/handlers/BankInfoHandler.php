@@ -66,4 +66,39 @@ class BankInfoHandler extends AbstractHandler
             $mysql_result['personal_code']
         );
     }
+
+    public function isIbanOccupied($iban) : bool
+    {
+        $sql = "SELECT * FROM " . $this->getTableName() . " WHERE BINARY iban='$iban'";
+        $result = $this->getConnection()->query($sql)->fetch_assoc();
+        return isset($result);
+    }
+
+    public function isSwiftCodeOccupied($swiftCode) : bool
+    {
+        $sql = "SELECT * FROM " . $this->getTableName() . " WHERE BINARY swift_code='$swiftCode'";
+        $result = $this->getConnection()->query($sql)->fetch_assoc();
+        return isset($result);
+    }
+
+    public function isPaypalOccupied($paypal) : bool
+    {
+        $sql = "SELECT * FROM " . $this->getTableName() . " WHERE BINARY paypal='$paypal'";
+        $result = $this->getConnection()->query($sql)->fetch_assoc();
+        return isset($result);
+    }
+
+    public function isDebitCardOccupied($debitCard) : bool
+    {
+        $sql = "SELECT * FROM " . $this->getTableName() . " WHERE BINARY debit_card='$debitCard'";
+        $result = $this->getConnection()->query($sql)->fetch_assoc();
+        return isset($result);
+    }
+
+    public function isPersonalCodeOccupied($personalCode) : bool
+    {
+        $sql = "SELECT * FROM " . $this->getTableName() . " WHERE BINARY personal_code='$personalCode'";
+        $result = $this->getConnection()->query($sql)->fetch_assoc();
+        return isset($result);
+    }
 }
