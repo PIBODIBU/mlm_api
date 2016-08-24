@@ -262,9 +262,6 @@ Flight::route('GET /users', function () {
     Flight::json($userHandler->getAll($userHandler->getPrivateSchema(), $limit, $offset));
 });
 
-Flight::route('/test', function () {
-});
-
 /**
  * Get timer of user
  */

@@ -25,23 +25,22 @@ class TimerHandler extends AbstractHandler
     protected function getTableSchema()
     {
         return array(
-            'user_id',
+            'uuid',
             'time_start'
         );
     }
 
     public function getPrivateSchema()
     {
-        return array(
-        );
+        return array();
     }
 
     public function getAll($ignore_fields = array(), $limit, $offset)
     {
-        $sql = "SELECT * FROM timer";
+        $sql = "SELECT * FROM " . $this->getTableName();
         $result = $this->getConnection()->query($sql)->fetch_assoc();
 
-        $result = $this->removeIgnoreFields($result,$ignore_fields);
+        $result = $this->removeIgnoreFields($result, $ignore_fields);
 
         return $result;
     }
@@ -49,7 +48,7 @@ class TimerHandler extends AbstractHandler
     protected function toObject($mysql_result)
     {
         return new Timer(
-            $mysql_result['user_id'],
+            $mysql_result['uuid'],
             $mysql_result['time_start']);
     }
 
@@ -66,20 +65,20 @@ class TimerHandler extends AbstractHandler
         return $mysql_result;
     }
 
-    public function getTimerByUserId($user_id,$convertToObject = false,$ignoreFields = array())
+    public function getTimerByUserId($user_id, $convertToObject = false, $ignoreFields = array())
     {
-        $sql = "SELECT * FROM timer WHERE user_id='$user_id'";
+        $sql = "SELECT * FROM " . $this->getTableName() . " WHERE uuid='$user_id'";
         $result = $this->getConnection()->query($sql)->fetch_assoc();
 
-        if(!isset($result)){
+        if (!isset($result)) {
             return NULL;
         }
 
-        $result = $this->removeIgnoreFields($result,$ignoreFields);
+        $result = $this->removeIgnoreFields($result, $ignoreFields);
 
-        if($convertToObject){
+        if ($convertToObject) {
             return $this->toObject($result);
-        } else{
+        } else {
             return $result;
         }
     }
