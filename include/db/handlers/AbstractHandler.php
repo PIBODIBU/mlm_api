@@ -29,7 +29,7 @@ abstract class AbstractHandler
 
         // Remove last comma in
         $sql = substr($sql, 0, -1);
-        $sql .= " WHERE " . $primaryKeyName . "='$primaryKeyValue'";
+        $sql .= " WHERE BINARY " . $primaryKeyName . "='$primaryKeyValue'";
 
         return $this->getConnection()->query($sql);
     }

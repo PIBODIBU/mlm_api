@@ -76,7 +76,7 @@ class UsersHandler extends AbstractHandler
 
     public function getUserByUUID($uuid, $convertToObject = false, $ignoreFields = array())
     {
-        $sql = "SELECT * FROM users WHERE BINARY uuid='$uuid'";
+        $sql = "SELECT * FROM " . $this->getTableName() . " WHERE BINARY uuid='$uuid'";
         $result = $this->getConnection()->query($sql)->fetch_assoc();
 
         if (!isset($result)) {
@@ -94,7 +94,7 @@ class UsersHandler extends AbstractHandler
 
     public function getUserByUsername($username, $convertToObject = false, $ignoreFields = array())
     {
-        $sql = "SELECT * FROM users WHERE BINARY username='$username'";
+        $sql = "SELECT * FROM " . $this->getTableName() . " WHERE BINARY username='$username'";
         $result = $this->getConnection()->query($sql)->fetch_assoc();
 
         if (!isset($result)) {
@@ -108,5 +108,12 @@ class UsersHandler extends AbstractHandler
         } else {
             return $result;
         }
+    }
+
+    public function isEmailOccupied($email) : bool
+    {
+        $sql = "SELECT * FROM " . $this->getTableName() . " WHERE BINARY email='$email'";
+        $result = $this->getConnection()->query($sql)->fetch_assoc();
+        return isset($result);
     }
 }

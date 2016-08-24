@@ -16,16 +16,19 @@ require_once '../include/security/API.php';
 require_once '../include/model/ShippingInfo.php';
 require_once '../include/model/BankInfo.php';
 
+require_once '../include/utils/ErrorCodes.php';
+
 /**
  * METHOD MAPPING
  */
 
 // Send error status & message via json
-Flight::map('jsonError', function ($error, $message) {
+Flight::map('jsonError', function ($error, $message, $error_code = NO_ERROR) {
     Flight::json(
         $response = array(
             'error' => $error,
-            'error_message' => $message
+            'error_message' => $message,
+            'error_code' => $error_code
         ));
 });
 
@@ -128,6 +131,11 @@ Flight::route('POST /register', function () {
     $createdAt = date("Y-m-d H:i:s");
     $lastLogin = date("Y-m-d H:i:s");
     $isOnline = 1;
+
+    // Basic checks
+    if ($userHandler->isEmailOccupied($email)) {
+        Flight::jsonError(TRUE, "Email address is already taken.", ERROR_EMAIL_ALREADY_TAKEN);
+    }
 
     $user = new User(
         $uuid,
