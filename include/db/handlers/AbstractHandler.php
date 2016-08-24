@@ -17,28 +17,34 @@ abstract class AbstractHandler
         return $this->getConnection()->query($sql);
     }
 
-    public function update($fields, $values)
+    public function update($fields, $values, $primaryKey = array())
     {
-        $sql = "UPDATE users SET ";
-        $uuid = "";
+        $sql = "UPDATE " . $this->getTableName() . " SET ";
+        $primaryKeyName = $primaryKey[0];
+        $primaryKeyValue = $primaryKey[1];
 
         for ($i = 0; $i < count($values); $i++) {
             $sql .= $fields[$i] . "='" . $values[$i] . "'" . ",";
-            if ($fields[$i] == "uuid") {
-                $uuid = $values[$i];
-            }
         }
 
         // Remove last comma in
         $sql = substr($sql, 0, -1);
-        $sql .= " WHERE uuid='$uuid'";
+        $sql .= " WHERE " . $primaryKeyName . "='$primaryKeyValue'";
 
         return $this->getConnection()->query($sql);
     }
 
     public function getAll($ignore_fields = array(), $limit, $offset)
     {
-        return array();
+        $sql = "SELECT * FROM " . $this->getTableName();
+        $response = array();
+        $result = $this->getConnection()->query($sql);
+
+        while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
+            $response[] = $this->removeIgnoreFields($row, $ignore_fields);
+        }
+
+        return $response;
     }
 
     protected function getTableName()
@@ -61,13 +67,21 @@ abstract class AbstractHandler
         return new mysqli();
     }
 
-    protected function convertToObject($mysql_result)
+    protected function toObject($mysql_result)
     {
         return;
     }
 
     protected function removeIgnoreFields($mysql_result, $ignoreFields)
     {
-        return;
+        if (!isset($ignoreFields) || !isset($mysql_result)) {
+            return $mysql_result;
+        }
+
+        foreach ($ignoreFields as $ignoreField) {
+            unset($mysql_result[$ignoreField]);
+        }
+
+        return $mysql_result;
     }
 }

@@ -16,39 +16,6 @@ class UsersHandler extends AbstractHandler
      * OVERRIDE
      */
 
-    public function update($fields, $values)
-    {
-        $sql = "UPDATE users SET ";
-        $uuid = "";
-
-        for ($i = 0; $i < count($values); $i++) {
-            if ($fields[$i] == "uuid") {
-                $uuid = $values[$i];
-                continue;
-            }
-            $sql .= $fields[$i] . "='" . $values[$i] . "'" . ",";
-        }
-
-        // Remove last comma in
-        $sql = substr($sql, 0, -1);
-        $sql .= " WHERE uuid='$uuid'";
-
-        return $this->getConnection()->query($sql);
-    }
-
-    public function getAll($ignore_fields = array(),$limit,$offset)
-    {
-        $sql = "SELECT * FROM users";
-        $response = array();
-        $result = $this->getConnection()->query($sql);
-
-        while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
-            $response[] = $this->removeIgnoreFields($row, $ignore_fields);
-        }
-
-        return $response;
-    }
-
     protected function getTableName()
     {
         return 'users';
@@ -92,7 +59,7 @@ class UsersHandler extends AbstractHandler
         return $this->connection;
     }
 
-    protected function convertToObject($mysql_result)
+    protected function toObject($mysql_result)
     {
         return new User(
             $mysql_result['uuid'],
@@ -102,20 +69,6 @@ class UsersHandler extends AbstractHandler
             $mysql_result['surname']
         );
     }
-
-    protected function removeIgnoreFields($mysql_result, $ignoreFields)
-    {
-        if (!isset($ignoreFields) || !isset($mysql_result)) {
-            return $mysql_result;
-        }
-
-        foreach ($ignoreFields as $ignoreField) {
-            unset($mysql_result[$ignoreField]);
-        }
-
-        return $mysql_result;
-    }
-
 
     /**
      * SELF
@@ -133,7 +86,7 @@ class UsersHandler extends AbstractHandler
         $result = $this->removeIgnoreFields($result, $ignoreFields);
 
         if ($convertToObject) {
-            return $this->convertToObject($result);
+            return $this->toObject($result);
         } else {
             return $result;
         }
@@ -151,7 +104,7 @@ class UsersHandler extends AbstractHandler
         $result = $this->removeIgnoreFields($result, $ignoreFields);
 
         if ($convertToObject) {
-            return $this->convertToObject($result);
+            return $this->toObject($result);
         } else {
             return $result;
         }

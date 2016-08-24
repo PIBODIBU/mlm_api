@@ -4,7 +4,7 @@ require_once 'AbstractModel.php';
 
 class User extends AbstractModel
 {
-    private $UUID;
+    private $uuid;
     private $apiKey;
     private $clientSecret;
     private $name;
@@ -33,7 +33,7 @@ class User extends AbstractModel
                                 $isOnline
     )
     {
-        $this->UUID = $UUID;
+        $this->uuid = $UUID;
         $this->apiKey = $apiKey;
         $this->clientSecret = $clientSecret;
         $this->name = $name;
@@ -51,7 +51,7 @@ class User extends AbstractModel
     public function getFields()
     {
         return array(
-            $this->UUID,
+            $this->uuid,
             $this->apiKey,
             $this->clientSecret,
             $this->name,
@@ -78,9 +78,9 @@ class User extends AbstractModel
         );
     }
 
-    public function getUUID(): string
+    public function getUuid(): string
     {
-        return $this->UUID;
+        return $this->uuid;
     }
 
     public function getApiKey(): string

@@ -46,7 +46,7 @@ class TimerHandler extends AbstractHandler
         return $result;
     }
 
-    protected function convertToObject($mysql_result)
+    protected function toObject($mysql_result)
     {
         return new Timer(
             $mysql_result['user_id'],
@@ -78,7 +78,7 @@ class TimerHandler extends AbstractHandler
         $result = $this->removeIgnoreFields($result,$ignoreFields);
 
         if($convertToObject){
-            return $this->convertToObject($result);
+            return $this->toObject($result);
         } else{
             return $result;
         }
