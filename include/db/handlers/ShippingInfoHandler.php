@@ -4,13 +4,6 @@ require_once dirname(__DIR__) . "/../model/ShippingInfo.php";
 
 class ShippingInfoHandler extends AbstractHandler
 {
-    private $connection;
-
-    public function __construct($connection)
-    {
-        $this->connection = $connection;
-    }
-
     /**
      * OVERRIDE
      */
@@ -46,11 +39,6 @@ class ShippingInfoHandler extends AbstractHandler
             'country',
             'phone',
         );
-    }
-
-    public function getConnection()
-    {
-        return $this->connection;
     }
 
     protected function toObject($mysql_result) : ShippingInfo

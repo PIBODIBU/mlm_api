@@ -1,10 +1,25 @@
 <?php
 
 require_once dirname(__DIR__) . "/../utils/Filter.php";
-include dirname(__DIR__) . "/../../libs/sparrow/sparrow.php";
+require_once dirname(__DIR__) . "/../../libs/sparrow/sparrow.php";
 
 abstract class AbstractHandler
 {
+    protected $connection;
+    protected $sparrow;
+
+    public function __construct($connection)
+    {
+        $this->connection = $connection;
+        $this->sparrow = new Sparrow();
+        $this->sparrow->setDb($this->connection);
+    }
+
+    public function getConnection()
+    {
+        return $this->connection;
+    }
+
     public function addItem($item)
     {
         $sql_values = "";
@@ -37,18 +52,28 @@ abstract class AbstractHandler
         return $this->getConnection()->query($sql);
     }
 
-    public function getAll(Filter $filter = NULL, $ignore_fields = array(), $limit = -1, $offset = -1)
+    public function getAll($ignoreFields = array(), $limit = -1, $offset = -1, Filter... $filters)
     {
-        $sql = "SELECT * FROM " . $this->getTableName();
-        if ($limit != -1 && $offset != -1) {
-            $sql .= " LIMIT $offset, $limit";
+        $where = array();
+
+        foreach ($filters as $filter) {
+            $where = array_merge($where, $filter->toArray());
         }
+
+        $sql = $this->sparrow
+            ->from($this->getTableName())
+            ->limit($limit == -1 ? null : $limit)
+            ->offset($offset == -1 ? null : $offset)
+            ->where($where)
+            ->select(array_diff($this->getTableSchema(), $ignoreFields))
+            ->sql();
+
 
         $response = array();
         $result = $this->getConnection()->query($sql);
 
         while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
-            $response[] = $this->removeIgnoreFields($row, $ignore_fields);
+            $response[] = $this->removeIgnoreFields($row, $ignoreFields);
         }
 
         return $response;
@@ -96,11 +121,6 @@ abstract class AbstractHandler
     public function getPrivateSchema()
     {
         return array();
-    }
-
-    public function getConnection()
-    {
-        return new mysqli();
     }
 
     protected function toObject($mysql_result)

@@ -5,18 +5,6 @@ require_once dirname(__DIR__) . "/../model/Timer.php";
 
 class TimerHandler extends AbstractHandler
 {
-    private $connection;
-
-    public function __construct($connection)
-    {
-        $this->connection = $connection;
-    }
-
-    public function getConnection()
-    {
-        return $this->connection;
-    }
-
     protected function getTableName()
     {
         return 'timer';

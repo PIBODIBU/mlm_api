@@ -4,13 +4,6 @@ require_once dirname(__DIR__) . "/../model/BankInfo.php";
 
 class BankInfoHandler extends AbstractHandler
 {
-    private $connection;
-
-    public function __construct($connection)
-    {
-        $this->connection = $connection;
-    }
-
     /**
      * OVERRIDE
      */
@@ -46,11 +39,6 @@ class BankInfoHandler extends AbstractHandler
             'bank_debit_card',
             'bank_personal_code',
         );
-    }
-
-    public function getConnection()
-    {
-        return $this->connection;
     }
 
     protected function toObject($mysql_result) : BankInfo

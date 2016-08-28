@@ -5,13 +5,6 @@ require_once dirname(__DIR__) . "/../model/User.php";
 
 class UsersHandler extends AbstractHandler
 {
-    private $connection;
-
-    public function __construct($connection)
-    {
-        $this->connection = $connection;
-    }
-
     /**
      * OVERRIDE
      */
@@ -52,11 +45,6 @@ class UsersHandler extends AbstractHandler
             'created_at',
             'last_login',
         );
-    }
-
-    public function getConnection()
-    {
-        return $this->connection;
     }
 
     protected function toObject($mysql_result)

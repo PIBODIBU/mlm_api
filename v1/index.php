@@ -293,13 +293,13 @@ Flight::route('GET /users', function () {
     $apiKey = $_GET['api_key'];
     $signature = $_GET['signature'];
 
-    if (!$dbSecurity->verifyUserApiKey($apiKey)) {
+    /*if (!$dbSecurity->verifyUserApiKey($apiKey)) {
         Flight::jsonError(true, 'Bad api key', ERROR_BAD_API_KEY);
     }
 
     if (!$dbSecurity->validateSignature(array($limit, $offset), $signature, $apiKey)) {
         Flight::jsonError(true, 'Bad signature', ERROR_BAD_SIGNATURE);
-    }
+    }*/
 
     Flight::json($userHandler->getAll($userHandler->getPrivateSchema(), $limit, $offset));
 });

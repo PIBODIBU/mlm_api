@@ -25,4 +25,9 @@ class Filter
     {
         return $this->value;
     }
+
+    public function toArray():array
+    {
+        return array($this->getName() => $this->getValue());
+    }
 }
