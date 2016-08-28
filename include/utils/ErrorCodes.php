@@ -10,3 +10,4 @@ define("ERROR_BAD_USERNAME_OR_PASSWORD", 7);
 define("ERROR_SERVER", 8);
 define("ERROR_BAD_API_KEY", 9);
 define("ERROR_BAD_SIGNATURE", 10);
+define("ERROR_INVALID_EMAIL", 11);

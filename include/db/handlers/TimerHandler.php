@@ -35,16 +35,6 @@ class TimerHandler extends AbstractHandler
         return array();
     }
 
-    public function getAll($ignore_fields = array(), $limit, $offset)
-    {
-        $sql = "SELECT * FROM " . $this->getTableName();
-        $result = $this->getConnection()->query($sql)->fetch_assoc();
-
-        $result = $this->removeIgnoreFields($result, $ignore_fields);
-
-        return $result;
-    }
-
     protected function toObject($mysql_result)
     {
         return new Timer(

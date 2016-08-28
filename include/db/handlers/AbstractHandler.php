@@ -1,6 +1,7 @@
 <?php
 
 require_once dirname(__DIR__) . "/../utils/Filter.php";
+include dirname(__DIR__) . "/../../libs/sparrow/sparrow.php";
 
 abstract class AbstractHandler
 {
@@ -36,7 +37,7 @@ abstract class AbstractHandler
         return $this->getConnection()->query($sql);
     }
 
-    public function getAll($ignore_fields = array(), $limit = -1, $offset = -1)
+    public function getAll(Filter $filter = NULL, $ignore_fields = array(), $limit = -1, $offset = -1)
     {
         $sql = "SELECT * FROM " . $this->getTableName();
         if ($limit != -1 && $offset != -1) {
@@ -61,7 +62,7 @@ abstract class AbstractHandler
      * @param array $ignoreFields - field to delete from result
      * @return array|mixed|null|void
      */
-    public function get($filter, $convertToObject = false, $ignoreFields = array())
+    public function get(Filter $filter, $convertToObject = false, $ignoreFields = array())
     {
         $filterName = $filter->getName();
         $filterValue = $filter->getValue();

@@ -11,4 +11,9 @@ class API
     {
         return bin2hex(openssl_random_pseudo_bytes(16));
     }
+
+    public static function generate_restore_code()
+    {
+        return bin2hex(openssl_random_pseudo_bytes(4));
+    }
 }

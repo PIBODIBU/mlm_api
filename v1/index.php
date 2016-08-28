@@ -33,8 +33,6 @@ Flight::map('jsonError', function ($error, $message, $error_code = NO_ERROR) {
 });
 
 /**
- * Get all users
- *
  * Required params:
  *                  name(string),
  *                  surname(string),
@@ -205,6 +203,11 @@ Flight::route('POST /register', function () {
         $userHandler->getUserByUUID($uuid, false, array('username', 'password')), false, ""));
 });
 
+/**
+ * Required params:
+ *                  username,
+ *                  password
+ */
 Flight::route('POST /login', function () {
     verifyRequiredParams(array('username', 'password'));
 
@@ -245,11 +248,40 @@ Flight::route('POST /login', function () {
 });
 
 /**
- * Get all users
+ * @api {post} /password/restore Get all users
+ * @apiName PostRestorePasswordWithEmail
+ * @apiGroup Security
  *
- * Required params:
- *                  limit(int),
- *                  offset(int)
+ * @apiParam {String} email User's email for password restoring.
+ *
+ * @apiSuccess {String} code Restore code.
+ */
+Flight::route('POST /password/restore', function () {
+    verifyRequiredParams(array('email'));
+
+    $connection = DbConnect::connect();
+    $dbSecurity = new DB_Security($connection);
+
+    $email = $_POST['email'];
+
+    if (!$dbSecurity->validateEmail($email)) {
+        Flight::jsonError(TRUE, 'Invalid email', ERROR_INVALID_EMAIL);
+    }
+
+    Flight::json(array('code' => $dbSecurity->createRestoreCode($email)));
+});
+
+/**
+ * @api {get} /users Get all users
+ * @apiName GetUsers
+ * @apiGroup User
+ *
+ * @apiParam {String} api_key User's API key.
+ * @apiParam {Number{0-30}} limit Result limit.
+ * @apiParam {Number} offset Result offset.
+ * @apiParam {String} signature Signature of the request.
+ *
+ * @apiSuccess {Object[]} users List of user profiles.
  */
 Flight::route('GET /users', function () {
     verifyRequiredParams(array('api_key', 'limit', 'offset', 'signature'));
@@ -273,7 +305,7 @@ Flight::route('GET /users', function () {
 });
 
 /**
- * Get timer of user
+ * Get user's timer
  */
 Flight::route('GET /timer', function () {
     verifyRequiredParams(array('uuid'));
