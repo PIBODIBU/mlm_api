@@ -19,7 +19,7 @@ require_once '../include/model/BankInfo.php';
 require_once '../include/utils/ErrorCodes.php';
 
 /**
- * METHOD MAPPING
+ * METHODS MAPPING
  */
 
 // Send error status & message via json
@@ -161,7 +161,7 @@ Flight::route('POST /register', function () {
         $email,
         $phone,
         $username,
-        md5($password),
+        password_hash($password, PASSWORD_BCRYPT, ['cost' => PASSWORD_ENCRYPTION_COST]),
         $refer,
         $createdAt,
         $lastLogin,
@@ -235,14 +235,13 @@ Flight::route('POST /login', function () {
         Flight::json(addErrorStatusToArray(array(), true, "Error occurred. Please, try again later.", ERROR_SERVER));
     }
 
-    addErrorStatusToArray(
-        $response = array(
+    Flight::json(
+        array(
             'main_info' => $userHandler->getUserByUUID($user['uuid'], false, array('username', 'password')),
             'bank_info' => $bankInfoHandler->get(new Filter('uuid', $user['uuid']), false, array('uuid')),
             'shipping_info' => $shippingInfoHandler->get(new Filter('uuid', $user['uuid']), false, array('uuid')),
-        ), false, "");
-
-    Flight::json($response);
+        )
+    );
 });
 
 /**
@@ -286,4 +285,5 @@ Flight::route('GET /timer', function () {
 
     Flight::json($timerHandler->getTimerByUserId($user_uuid));
 });
+
 Flight::start();

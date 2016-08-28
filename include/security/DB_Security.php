@@ -2,6 +2,8 @@
 
 require_once dirname(__DIR__) . '/db/db_connect.php';
 
+define('PASSWORD_ENCRYPTION_COST', 12);
+
 class DB_Security
 {
     private $connection;
@@ -48,7 +50,7 @@ class DB_Security
 
     public function validatePassword($user_password, $db_hash)
     {
-        return hash_equals(md5($user_password), $db_hash);
+        return password_verify($user_password, $db_hash);
     }
 
     /**
