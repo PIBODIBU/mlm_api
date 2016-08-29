@@ -15,7 +15,7 @@ abstract class AbstractHandler
         $this->sparrow->setDb($this->connection);
     }
 
-    public function getConnection()
+    public function getConnection():mysqli
     {
         return $this->connection;
     }
@@ -64,10 +64,9 @@ abstract class AbstractHandler
             ->from($this->getTableName())
             ->limit($limit == -1 ? null : $limit)
             ->offset($offset == -1 ? null : $offset)
-            ->where($where)
+            ->where($where, true)
             ->select(array_diff($this->getTableSchema(), $ignoreFields))
             ->sql();
-
 
         $response = array();
         $result = $this->getConnection()->query($sql);
