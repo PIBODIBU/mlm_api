@@ -8,12 +8,12 @@ class BankInfoHandler extends AbstractHandler
      * OVERRIDE
      */
 
-    protected function getTableName()
+    public static function getTableName()
     {
         return 'info_bank';
     }
 
-    protected function getTableSchema()
+    public static function getTableSchema()
     {
         return array(
             'uuid',
@@ -27,7 +27,7 @@ class BankInfoHandler extends AbstractHandler
         );
     }
 
-    public function getPrivateSchema()
+    public static function getPrivateSchema()
     {
         return array(
             'uuid',
@@ -73,7 +73,7 @@ class BankInfoHandler extends AbstractHandler
         }
     }
 
-    public function isIbanOccupied($iban) : bool
+    public function isIBANOccupied($iban) : bool
     {
         $sql = "SELECT * FROM " . $this->getTableName() . " WHERE BINARY iban='$iban'";
         $result = $this->getConnection()->query($sql)->fetch_assoc();

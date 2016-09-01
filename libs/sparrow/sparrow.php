@@ -161,11 +161,12 @@ class Sparrow
      * @param string $field Database field
      * @param string $value Condition value
      * @param string $join Joining word
+     * @param boolean $binary
      * @param boolean $escape Escape values setting
      * @return string Condition as a string
      * @throws Exception For invalid where condition
      */
-    protected function parseCondition($field, $value = null, $join = '', $escape = true)
+    protected function parseCondition($field, $value = null, $join = '', $binary = false, $escape = true)
     {
         if (is_string($field)) {
             if ($value === null) return $join . ' ' . trim($field);
@@ -202,7 +203,11 @@ class Sparrow
             }
 
             if (empty($join)) {
-                $join = ($field{0} == '|') ? ' OR' : ' AND';
+                if ($binary === true) {
+                    $join = ($field{0} == '|') ? ' OR BINARY' : ' AND BINARY';
+                } else {
+                    $join = ($field{0} == '|') ? ' OR' : ' AND';
+                }
             }
 
             if (is_array($value)) {
@@ -216,7 +221,7 @@ class Sparrow
         } else if (is_array($field)) {
             $str = '';
             foreach ($field as $key => $value) {
-                $str .= $this->parseCondition($key, $value, $join, $escape);
+                $str .= $this->parseCondition($key, $value, $join, $binary, $escape);
                 $join = '';
             }
             return $str;
@@ -317,7 +322,7 @@ class Sparrow
     public function where($field, $binary = false, $value = null)
     {
         $join = (empty($this->where)) ? $binary ? 'WHERE BINARY' : 'WHERE' : '';
-        $this->where .= $this->parseCondition($field, $value, $join);
+        $this->where .= $this->parseCondition($field, $value, $join, $binary);
 
         return $this;
     }

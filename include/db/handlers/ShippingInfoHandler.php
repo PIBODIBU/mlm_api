@@ -8,12 +8,12 @@ class ShippingInfoHandler extends AbstractHandler
      * OVERRIDE
      */
 
-    protected function getTableName()
+    public static function getTableName()
     {
         return 'info_shipping';
     }
 
-    protected function getTableSchema()
+    public static function getTableSchema()
     {
         return array(
             'uuid',
@@ -27,7 +27,7 @@ class ShippingInfoHandler extends AbstractHandler
         );
     }
 
-    public function getPrivateSchema()
+    public static function getPrivateSchema()
     {
         return array(
             'uuid',

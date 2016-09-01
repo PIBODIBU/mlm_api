@@ -9,12 +9,12 @@ class UsersHandler extends AbstractHandler
      * OVERRIDE
      */
 
-    protected function getTableName()
+    public static function getTableName()
     {
         return 'users';
     }
 
-    protected function getTableSchema()
+    public static function getTableSchema()
     {
         return array(
             'uuid',
@@ -33,7 +33,7 @@ class UsersHandler extends AbstractHandler
         );
     }
 
-    public function getPrivateSchema()
+    public static function getPrivateSchema()
     {
         return array(
             'uuid',
@@ -54,13 +54,45 @@ class UsersHandler extends AbstractHandler
             $mysql_result['api_key'],
             $mysql_result['client_secret'],
             $mysql_result['name'],
-            $mysql_result['surname']
+            $mysql_result['surname'],
+            $mysql_result['email'],
+            $mysql_result['phone'],
+            $mysql_result['username'],
+            $mysql_result['password'],
+            $mysql_result['refer'],
+            $mysql_result['created_at'],
+            $mysql_result['last_login'],
+            $mysql_result['is_online']
         );
     }
 
     /**
      * SELF
      */
+
+    public function getUserByEmail($email, $convertToObject = false, $ignoreFields = array())
+    {
+        $sql = $this->sparrow
+            ->from(self::getTableName())
+            ->select()
+            ->where(array('email' => $email), true)
+            ->select(array_diff($this->getTableSchema(), $ignoreFields))
+            ->sql();
+
+        $result = $this->getConnection()->query($sql)->fetch_assoc();
+
+        if (!isset($result)) {
+            return NULL;
+        }
+
+        $result = $this->removeIgnoreFields($result, $ignoreFields);
+
+        if ($convertToObject) {
+            return $this->toObject($result);
+        } else {
+            return $result;
+        }
+    }
 
     public function getUserByUUID($uuid, $convertToObject = false, $ignoreFields = array())
     {
@@ -96,6 +128,23 @@ class UsersHandler extends AbstractHandler
         } else {
             return $result;
         }
+    }
+
+    public function changePassword($email, $newPassword):bool
+    {
+        $user = $this->getUserByEmail($email, true);
+
+        if ($user === NULL) {
+            return false;
+        }
+
+        $sql = $this->sparrow
+            ->from(self::getTableName())
+            ->where(array('uuid' => $user->getUuid()), true)
+            ->update(array('password' => password_hash($newPassword, PASSWORD_BCRYPT, ['cost' => PASSWORD_ENCRYPTION_COST])))
+            ->sql();
+
+        return $this->getConnection()->query($sql);
     }
 
     public function isEmailOccupied($email) : bool

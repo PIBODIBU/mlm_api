@@ -2,16 +2,20 @@
 
 require_once dirname(__DIR__) . '/db/db_connect.php';
 require_once dirname(__DIR__) . '/db/handlers/UsersHandler.php';
+require_once dirname(__DIR__) . '/db/handlers/RestoreCodeHandler.php';
 
 define('PASSWORD_ENCRYPTION_COST', 12);
 
 class DB_Security
 {
     private $connection;
+    private $sparrow;
 
     public function __construct($connection = NULL)
     {
         $this->connection = $connection == NULL ? DbConnect::connect() : $connection;
+        $this->sparrow = new Sparrow();
+        $this->sparrow->setDb($this->connection);
     }
 
     /**
@@ -61,13 +65,6 @@ class DB_Security
         $userHandler = new UsersHandler($this->getConnection());
         $user = $userHandler->get(new Filter('email', $email));
         return isset($user);
-    }
-
-    public function createRestoreCode($email)
-    {
-        $restoreCode = API::generate_restore_code();
-
-        return $restoreCode;
     }
 
     /**

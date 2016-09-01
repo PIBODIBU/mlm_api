@@ -5,12 +5,12 @@ require_once dirname(__DIR__) . "/../model/Timer.php";
 
 class TimerHandler extends AbstractHandler
 {
-    protected function getTableName()
+    public static function getTableName()
     {
         return 'timer';
     }
 
-    protected function getTableSchema()
+    public static function getTableSchema()
     {
         return array(
             'uuid',
@@ -18,7 +18,7 @@ class TimerHandler extends AbstractHandler
         );
     }
 
-    public function getPrivateSchema()
+    public static function getPrivateSchema()
     {
         return array();
     }

@@ -11,12 +11,15 @@ require_once '../include/db/handlers/BankInfoHandler.php';
 require_once '../include/db/handlers/ShippingInfoHandler.php';
 
 require_once '../include/security/UUID.php';
-require_once '../include/security/API.php';
+require_once '../include/security/APISecSec.php';
 
 require_once '../include/model/ShippingInfo.php';
 require_once '../include/model/BankInfo.php';
 
 require_once '../include/utils/ErrorCodes.php';
+require_once '../include/config/loc_config.php';
+
+define('UPLOAD_DIRECTORY', dirname(__DIR__) . "/uploads/");
 
 /**
  * METHODS MAPPING
@@ -32,31 +35,60 @@ Flight::map('jsonError', function ($error, $message, $error_code = NO_ERROR) {
         ));
 });
 
+Flight::route('/test/upload', function () {
+    $response = array();
+    $fileName = APISec::generate_file_name();
+    $uploadFile = UPLOAD_DIRECTORY . $fileName;
+    $fileExtension = pathinfo($_FILES['userfile']['name'], PATHINFO_EXTENSION);
+    $uploadFile .= '.' . $fileExtension;
+
+    if (move_uploaded_file($_FILES['userfile']['tmp_name'], $uploadFile)) {
+        $response['error'] = FALSE;
+        $response['error_message'] = "File successfully uploaded.";
+        $response['photo_url'] = UPLOADS_DIR_URL . $fileName .= '.' . $fileExtension;
+    } else {
+        $response['error'] = TRUE;
+        $response['error_message'] = "Upload failed";
+    }
+
+    Flight::json($response);
+});
+
 /**
- * Required params:
- *                  name(string),
- *                  surname(string),
- *                  email(string),
- *                  phone(string),
- *                  username(string),
- *                  password(string),
- *                  refer(string),
+ * @api {post} /register Register
+ * @apiDescription Register in the app.
+ * @apiName PostRegister
+ * @apiGroup Basic
  *
- *                  shipping_name,
- *                  shipping_surname,
- *                  shipping_address,
- *                  shipping_city,
- *                  shipping_postal_code,
- *                  shipping_country,
- *                  shipping_phone,
+ * @apiParam (Main info) {String} name Name.
+ * @apiParam (Main info) {String} surname Surname.
+ * @apiParam (Main info) {String} email Email address.
+ * @apiParam (Main info) {String} phone Phone number in international format.
+ * @apiParam (Main info) {String} username Username.
+ * @apiParam (Main info) {String} password Password.
+ * @apiParam (Main info) {String} refer Username of the referrer.
+ * @apiParam (Shipping info) {String} shipping_name Name.
+ * @apiParam (Shipping info) {String} shipping_surname Surname.
+ * @apiParam (Shipping info) {String} shipping_address Full address.
+ * @apiParam (Shipping info) {String} shipping_city City.
+ * @apiParam (Shipping info) {String} shipping_postal_code Postal code.
+ * @apiParam (Shipping info) {String} shipping_country Country.
+ * @apiParam (Shipping info) {String} shipping_phone Phone number in international format.
+ * @apiParam (Bank info) {String} bank_name Name.
+ * @apiParam (Bank info) {String} bank_surname Surname.
+ * @apiParam (Bank info) {String} bank_iban IBAN.
+ * @apiParam (Bank info) {String} bank_swift_code Swift code.
+ * @apiParam (Bank info) {String} bank_paypal Paypal email.
+ * @apiParam (Bank info) {String} bank_debit_card Number of debit card.
+ * @apiParam (Bank info) {String} bank_personal_code Personal code.
  *
- *                  bank_name,
- *                  bank_surname,
- *                  bank_iban,
- *                  bank_swift_code,
- *                  bank_paypal,
- *                  bank_debit_card,
- *                  bank_personal_code
+ * @apiSuccess {Object} main_info Main user's info.
+ * @apiSuccess {Object} bank_info Bank info.
+ * @apiSuccess {Object} shipping_info Shipping info.
+ *
+ * @apiError {Boolean} error Error status
+ * @apiError {String} error_message Description of the error
+ * @apiError {Number} error_code Identifier of the error
  */
 Flight::route('POST /register', function () {
     verifyRequiredParams(array(
@@ -124,8 +156,8 @@ Flight::route('POST /register', function () {
 
     // Additional info
     $uuid = UUID::generate_v4();
-    $apiKey = API::generate_key();
-    $clientSecret = API::generate_secret();
+    $apiKey = APISec::generate_key();
+    $clientSecret = APISec::generate_secret();
     $createdAt = date("Y-m-d H:i:s");
     $lastLogin = date("Y-m-d H:i:s");
     $isOnline = 1;
@@ -137,7 +169,7 @@ Flight::route('POST /register', function () {
     if ($userHandler->isUsernameOccupied($username)) {
         Flight::jsonError(TRUE, "Username is already taken", ERROR_USERNAME_ALREADY_TAKEN);
     }
-    if ($bankInfoHandler->isIbanOccupied($bankIban)) {
+    if ($bankInfoHandler->isIBANOccupied($bankIban)) {
         Flight::jsonError(TRUE, "IBAN is already taken", ERROR_IBAN_ALREADY_TAKEN);
     }
     if ($bankInfoHandler->isSwiftCodeOccupied($bankSwiftCode)) {
@@ -204,9 +236,22 @@ Flight::route('POST /register', function () {
 });
 
 /**
- * Required params:
- *                  username,
- *                  password
+ * @api {post} /login Login
+ * @apiDescription Get API key, client secret and UUID by username and password
+ * @apiName PostLogin
+ * @apiGroup Basic
+ *
+ * @apiParam {String} username User's username.
+ * @apiParam {String} password User's password.
+ *
+ *
+ * @apiSuccess {Object} main_info Main user's info.
+ * @apiSuccess {Object} bank_info Bank info.
+ * @apiSuccess {Object} shipping_info Shipping info.
+ *
+ * @apiError {Boolean} error Error status
+ * @apiError {String} error_message Description of the error
+ * @apiError {Number} error_code Identifier of the error
  */
 Flight::route('POST /login', function () {
     verifyRequiredParams(array('username', 'password'));
@@ -235,32 +280,40 @@ Flight::route('POST /login', function () {
         array('uuid', $user['uuid'])
     )
     ) {
-        Flight::json(addErrorStatusToArray(array(), true, "Error occurred. Please, try again later.", ERROR_SERVER));
+        Flight::json(addErrorStatusToArray(array(), true, "Error occurred. Please, try again later.", ERROR_INTERNAL_SERVER));
     }
 
     Flight::json(
         array(
             'main_info' => $userHandler->getUserByUUID($user['uuid'], false, array('username', 'password')),
-            'bank_info' => $bankInfoHandler->get(new Filter('uuid', $user['uuid']), false, array('uuid')),
-            'shipping_info' => $shippingInfoHandler->get(new Filter('uuid', $user['uuid']), false, array('uuid')),
+            'bank_info' => $bankInfoHandler->get(false, array('uuid'), new Filter('uuid', $user['uuid'])),
+            'shipping_info' => $shippingInfoHandler->get(false, array('uuid'), new Filter('uuid', $user['uuid'])),
         )
     );
 });
 
 /**
- * @api {post} /password/restore Get all users
- * @apiName PostRestorePasswordWithEmail
- * @apiGroup Security
+ * @api {post} /restore/code Request code
+ * @apiDescription Request code generation.
+ * @apiName PostRequestCodeGen
+ * @apiGroup Password restore
  *
  * @apiParam {String} email User's email for password restoring.
  *
- * @apiSuccess {String} code Restore code.
+ * @apiSuccess {Boolean} error Error status
+ * @apiSuccess {String} error_message Description of the error
+ * @apiSuccess {Number} error_code Identifier of the error
+ *
+ * @apiError {Boolean} error Error status
+ * @apiError {String} error_message Description of the error
+ * @apiError {Number} error_code Identifier of the error
  */
-Flight::route('POST /password/restore', function () {
+Flight::route('POST /restore/code', function () {
     verifyRequiredParams(array('email'));
 
     $connection = DbConnect::connect();
     $dbSecurity = new DB_Security($connection);
+    $restoreCodeHandler = new RestoreCodeHandler($connection);
 
     $email = $_POST['email'];
 
@@ -268,7 +321,43 @@ Flight::route('POST /password/restore', function () {
         Flight::jsonError(TRUE, 'Invalid email', ERROR_INVALID_EMAIL);
     }
 
-    Flight::json(array('code' => $dbSecurity->createRestoreCode($email)));
+    if ($restoreCodeHandler->isCodeAlreadyCreated($email)) {
+        Flight::jsonError(TRUE, 'Code is already generated. Please, check your email.', ERROR_CODE_ALREADY_GENERATED);
+    }
+
+    if ($restoreCodeHandler->createRestoreCode($email, true)) {
+        Flight::jsonError(false, "Code successfully generated. Please, check your email.");
+    } else {
+        Flight::jsonError(true, "Server error. Please, try again later.", ERROR_INTERNAL_SERVER);
+    }
+});
+
+// TODO write docs
+Flight::route('POST /restore/password', function () {
+    verifyRequiredParams(array('email', 'restore_code', 'new_password'));
+
+    $connection = DbConnect::connect();
+    $dbSecurity = new DB_Security($connection);
+    $usersHandler = new UsersHandler($connection);
+    $restoreCodeHandler = new RestoreCodeHandler($connection);
+
+    $email = $_POST['email'];
+    $code = $_POST['restore_code'];
+    $newPassword = $_POST['new_password'];
+
+    if (!$dbSecurity->validateEmail($email)) {
+        Flight::jsonError(TRUE, 'Invalid email', ERROR_INVALID_EMAIL);
+    }
+
+    if (!$restoreCodeHandler->isCodeValid($email, $code)) {
+        Flight::jsonError(TRUE, 'Invalid restore code.', ERROR_BAD_RESTORE_CODE);
+    }
+
+    if (!$usersHandler->changePassword($email, $newPassword)) {
+        Flight::jsonError(TRUE, 'Server error occurred. Please, try again later.', ERROR_INTERNAL_SERVER);
+    }
+
+    Flight::jsonError(FALSE, 'Password successfully changed.');
 });
 
 /**
@@ -293,13 +382,17 @@ Flight::route('GET /users', function () {
     $apiKey = $_GET['api_key'];
     $signature = $_GET['signature'];
 
-    /*if (!$dbSecurity->verifyUserApiKey($apiKey)) {
+    if ($limit > 30) {
+        Flight::jsonError(true, 'Too large limit', ERROR_TOO_LARGE_LIMIT);
+    }
+
+    if (!$dbSecurity->verifyUserApiKey($apiKey)) {
         Flight::jsonError(true, 'Bad api key', ERROR_BAD_API_KEY);
     }
 
     if (!$dbSecurity->validateSignature(array($limit, $offset), $signature, $apiKey)) {
         Flight::jsonError(true, 'Bad signature', ERROR_BAD_SIGNATURE);
-    }*/
+    }
 
     Flight::json($userHandler->getAll($userHandler->getPrivateSchema(), $limit, $offset));
 });

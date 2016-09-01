@@ -81,16 +81,24 @@ abstract class AbstractHandler
     /**
      * Get one item from database with filtering
      *
-     * @param Filter $filter - filter for SQL query, which contains name and value (column name & filtering value). @see Filter
+     * @param Filter[] ...$filters - filters for SQL query, which contains name and value (column name & filtering value). @see Filter
      * @param bool $convertToObject - convert result to Filter or not
      * @param array $ignoreFields - field to delete from result
      * @return array|mixed|null|void
      */
-    public function get(Filter $filter, $convertToObject = false, $ignoreFields = array())
+    public function get($convertToObject = false, $ignoreFields = array(), Filter... $filters)
     {
-        $filterName = $filter->getName();
-        $filterValue = $filter->getValue();
-        $sql = "SELECT * FROM " . $this->getTableName() . " WHERE BINARY $filterName='$filterValue'";
+        $where = array();
+
+        foreach ($filters as $filter) {
+            $where = array_merge($where, $filter->toArray());
+        }
+
+        $sql = $this->sparrow
+            ->from($this->getTableName())
+            ->where($where, true)
+            ->select(array_diff($this->getTableSchema(), $ignoreFields))
+            ->sql();
 
         $result = $this->getConnection()->query($sql)->fetch_assoc();
 
@@ -107,17 +115,17 @@ abstract class AbstractHandler
         }
     }
 
-    protected function getTableName()
+    public static function getTableName()
     {
         return '';
     }
 
-    protected function getTableSchema()
+    public static function getTableSchema()
     {
         return array();
     }
 
-    public function getPrivateSchema()
+    public static function getPrivateSchema()
     {
         return array();
     }

@@ -4,12 +4,14 @@ class RestoreCode extends AbstractModel
 {
     private $uuid;
     private $code;
+    private $createdAt;
 
     public function getFields()
     {
         return array(
             $this->uuid,
-            $this->code
+            $this->code,
+            $this->createdAt,
         );
     }
 
@@ -26,5 +28,10 @@ class RestoreCode extends AbstractModel
     public function getCode()
     {
         return $this->code;
+    }
+
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
     }
 }
