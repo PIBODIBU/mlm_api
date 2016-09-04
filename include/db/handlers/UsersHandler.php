@@ -111,7 +111,7 @@ class UsersHandler extends AbstractHandler
 
         $sql = $this->sparrow
             ->from(self::getTableName())
-            ->where(array('uuid' => $user->getUUID()), true)
+            ->where(array('uuid' => $user->getUuid()), true)
             ->update(array('photo_name' => $fileName))
             ->sql();
 
@@ -170,7 +170,7 @@ class UsersHandler extends AbstractHandler
 
         $sql = $this->sparrow
             ->from(self::getTableName())
-            ->where(array('uuid' => $user->getUUID()), true)
+            ->where(array('uuid' => $user->getUuid()), true)
             ->update(array('password' => password_hash($newPassword, PASSWORD_BCRYPT, ['cost' => PASSWORD_ENCRYPTION_COST])))
             ->sql();
 

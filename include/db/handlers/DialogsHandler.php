@@ -1,6 +1,7 @@
 <?php
 
 require_once 'AbstractHandler.php';
+require_once 'MessagesHandler.php';
 require_once dirname(__DIR__) . "/../model/Dialog.php";
 require_once dirname(__DIR__) . "/../config/loc_config.php";
 
@@ -40,19 +41,43 @@ class DialogsHandler extends AbstractHandler
      * SELF
      */
 
+    public function getDialog($dialogId)
+    {
+        $messagesHandler = new MessagesHandler($this->getConnection());
+        $sql_dialogs_list = $this->sparrow
+            ->from($this->getTableName())
+            ->where(array('id' => $dialogId))
+            ->select()
+            ->sql();
+
+        $dialog = $this->getConnection()->query($sql_dialogs_list)->fetch_assoc();
+        $dialog['last_message'] = $messagesHandler->getLastMessageForDialog($dialog['id']);
+
+        return $dialog;
+    }
+
     public function getDialogs($userUUID)
     {
-        $sql = $this->sparrow
+        $messagesHandler = new MessagesHandler($this->getConnection());
+        $response = array();
+        $sql_dialogs_list = $this->sparrow
             ->from($this->getTableName())
             ->where(array('owner_uuid' => $userUUID), true)
             ->where(array('|peer_uuid' => $userUUID), true)
             ->select()
             ->sql();
 
-        $response = array();
-        $result = $this->getConnection()->query($sql);
+        $result = $this->getConnection()->query($sql_dialogs_list);
 
         while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
+            // Get last message for dialog
+            $lastMessage = $messagesHandler->getLastMessageForDialog($row['id']);
+
+            // If the is no messages in this dialog - just ignore it  and continue looping
+            if ($lastMessage === null)
+                continue;
+
+            $row['last_message'] = $lastMessage;
             $response[] = $row;
         }
 

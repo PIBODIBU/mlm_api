@@ -48,7 +48,7 @@ class RestoreCodeHandler extends AbstractHandler
     public function isCodeValid($email, $code):bool
     {
         $userHandler = new UsersHandler($this->getConnection());
-        $uuid = $userHandler->getUserByEmail($email, true)->getUUID();
+        $uuid = $userHandler->getUserByEmail($email, true)->getUuid();
         $codeEntry = $this->get(false, array(), new Filter('uuid', $uuid), new Filter('code', $code));
         return isset($codeEntry);
     }
@@ -61,7 +61,7 @@ class RestoreCodeHandler extends AbstractHandler
     public function isCodeAlreadyCreated($email):bool
     {
         $userHandler = new UsersHandler($this->getConnection());
-        $uuid = $userHandler->getUserByEmail($email, true)->getUUID();
+        $uuid = $userHandler->getUserByEmail($email, true)->getUuid();
         $codeEntry = $this->get(new Filter('uuid', $uuid));
         return isset($codeEntry);
     }

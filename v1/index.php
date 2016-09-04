@@ -404,7 +404,7 @@ Flight::route('GET /users', function () {
     Flight::json($userHandler->getAll($userHandler->getPrivateSchema(), $limit, $offset));
 });
 
-Flight::route('GET /dialogs/get', function () {
+Flight::route('GET /dialogs', function () {
     verifyRequiredParams(array('api_key', 'limit', 'offset', 'signature'));
 
     $connection = DbConnect::connect();
@@ -425,16 +425,48 @@ Flight::route('GET /dialogs/get', function () {
         Flight::jsonError(true, 'Bad signature', ERROR_BAD_SIGNATURE);
     }
 
+    // Get user
     $user = $userHandler->get(true, array(), new Filter('api_key', $apiKey));
 
     if ($user === NULL) {
         Flight::jsonError(TRUE, 'User not found', ERROR_USER_NOT_FOUND);
     }
 
-    Flight::json($dialogsHandler->getDialogs($user->getUUID()));
+    // Get dialogs list
+    $dialogs = $dialogsHandler->getDialogs($user->getUUID());
+
+    Flight::json($dialogs);
 });
 
-Flight::route('GET /messages/get/@dialog_id:[0-9]+', function ($dialogId) {
+// TODO write docs
+Flight::route('GET /dialogs/@id:[0-9]+', function ($dialogId) {
+    verifyRequiredParams(array('api_key', 'signature'));
+
+    $connection = DbConnect::connect();
+    $dialogsHandler = new DialogsHandler($connection);
+    $dbSecurity = new DB_Security($connection);
+
+    $apiKey = $_GET['api_key'];
+
+    if (!$dbSecurity->verifyUserApiKey($apiKey)) {
+        Flight::jsonError(true, 'Bad api key', ERROR_BAD_API_KEY);
+    }
+
+    if (!$dialogsHandler->isDialogExists($dialogId)) {
+        Flight::jsonError(true, 'Dialog does not exists', ERROR_DIALOG_NOT_EXISTS);
+    }
+
+    if (!$dbSecurity->isMyDialog($apiKey, $dialogId)) {
+        Flight::jsonError(true, 'It is not your dialog', ERROR_NOT_YOUR_DIALOG);
+    }
+
+    Flight::json($dialogsHandler->getDialog($dialogId));
+});
+
+// TODO write docs
+Flight::route('GET /messages/@dialog_id:[0-9]+', function ($dialogId) {
+    verifyRequiredParams(array('api_key', 'limit', 'offset', 'signature'));
+
     $connection = DbConnect::connect();
     $messagesHandler = new MessagesHandler($connection);
     $dialogsHandler = new DialogsHandler($connection);
@@ -462,6 +494,40 @@ Flight::route('GET /messages/get/@dialog_id:[0-9]+', function ($dialogId) {
     }
 
     Flight::json($messagesHandler->getAll(array(), $limit, $offset, new Filter('dialog_id', $dialogId)));
+});
+
+// TODO write docs
+// Sig: message_id(path) + client_secret
+Flight::route('GET /messages/@id:[0-9]+/read', function ($messageId) {
+    verifyRequiredParams(array('api_key', 'signature'));
+
+    $connection = DbConnect::connect();
+    $messagesHandler = new MessagesHandler($connection);
+    $dialogsHandler = new DialogsHandler($connection);
+    $dbSecurity = new DB_Security($connection);
+
+    $apiKey = $_GET['api_key'];
+    $signature = $_GET['signature'];
+
+    if (!$dbSecurity->verifyUserApiKey($apiKey)) {
+        Flight::jsonError(true, 'Bad api key', ERROR_BAD_API_KEY);
+    }
+
+    if (!$dbSecurity->validateSignature(array($messageId), $signature, $apiKey)) {
+        Flight::jsonError(true, 'Bad signature', ERROR_BAD_SIGNATURE);
+    }
+
+    $dialogId = $messagesHandler->getDialogIdFromMessage($messageId);
+
+    if (!$dbSecurity->isMyDialog($apiKey, $dialogId)) {
+        Flight::jsonError(true, 'It is not your dialog', ERROR_NOT_YOUR_DIALOG);
+    }
+
+    if (!$messagesHandler->markAsRead($messageId)) {
+        Flight::jsonError(true, 'Server error occurred', ERROR_INTERNAL_SERVER);
+    }
+
+    Flight::jsonError(false, 'Message was marked as read', NO_ERROR);
 });
 
 /**

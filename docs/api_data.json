@@ -142,6 +142,13 @@
             "optional": false,
             "field": "refer",
             "description": "<p>Username of the referrer.</p>"
+          },
+          {
+            "group": "Main info",
+            "type": "Object",
+            "optional": false,
+            "field": "Multipart",
+            "description": "<p>file - user's photo.</p>"
           }
         ],
         "Shipping info": [
@@ -308,10 +315,11 @@
   },
   {
     "type": "get",
-    "url": "/users",
-    "title": "Get all users",
-    "name": "GetUsers",
-    "group": "User",
+    "url": "/dialogs/:id",
+    "title": "Get dialogs",
+    "description": "<p>Get list of user's dialogs.</p>",
+    "name": "GetDialogsList",
+    "group": "Dialogs",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -320,29 +328,14 @@
             "type": "String",
             "optional": false,
             "field": "api_key",
-            "description": "<p>User's API key.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "size": "0-30",
-            "optional": false,
-            "field": "limit",
-            "description": "<p>Result limit.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "offset",
-            "description": "<p>Result offset.</p>"
+            "description": "<p>User's APi key.</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": false,
             "field": "signature",
-            "description": "<p>Signature of the request.</p>"
+            "description": "<p>MD5 signature (path,secret).</p>"
           }
         ]
       }
@@ -354,15 +347,42 @@
             "group": "Success 200",
             "type": "Object[]",
             "optional": false,
-            "field": "users",
-            "description": "<p>List of user profiles.</p>"
+            "field": "dialog",
+            "description": "<p>Dialog</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error      status</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "error_message",
+            "description": "<p>Description of the error</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "error_code",
+            "description": "<p>Identifier of the error</p>"
           }
         ]
       }
     },
     "version": "0.0.0",
     "filename": "mlm_rest_api/v1/index.php",
-    "groupTitle": "User"
+    "groupTitle": "Dialogs"
   },
   {
     "type": "post",
@@ -370,7 +390,7 @@
     "title": "Request code",
     "description": "<p>Request code generation.</p>",
     "name": "PostRequestCodeGen",
-    "group": "_Password_restore_",
+    "group": "Password_restore",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -440,6 +460,92 @@
     },
     "version": "0.0.0",
     "filename": "mlm_rest_api/v1/index.php",
-    "groupTitle": "_Password_restore_"
+    "groupTitle": "Password_restore"
+  },
+  {
+    "type": "get",
+    "url": "/users",
+    "title": "Get all users",
+    "name": "GetUsers",
+    "group": "User",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "api_key",
+            "description": "<p>User's API key.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "size": "0-30",
+            "optional": false,
+            "field": "limit",
+            "description": "<p>Result limit.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "offset",
+            "description": "<p>Result offset.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "signature",
+            "description": "<p>Signature of the request.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "users",
+            "description": "<p>List of user profiles.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "mlm_rest_api/v1/index.php",
+    "groupTitle": "User"
+  },
+  {
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "optional": false,
+            "field": "varname1",
+            "description": "<p>No type.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "varname2",
+            "description": "<p>With type.</p>"
+          }
+        ]
+      }
+    },
+    "type": "",
+    "url": "",
+    "version": "0.0.0",
+    "filename": "mlm_rest_api/docs/main.js",
+    "group": "_home_simple_Projects_PhpstormProjects_mlm_rest_api_docs_main_js",
+    "groupTitle": "_home_simple_Projects_PhpstormProjects_mlm_rest_api_docs_main_js",
+    "name": ""
   }
 ]

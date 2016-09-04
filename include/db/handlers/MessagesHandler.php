@@ -50,4 +50,42 @@ class MessagesHandler extends AbstractHandler
     /**
      * SELF
      */
+
+    public function getLastMessageForDialog($dialog_id)
+    {
+        $sql = $this->sparrow
+            ->from(self::getTableName())
+            ->where(array('dialog_id' => $dialog_id))
+            ->sortDesc('id')
+            ->limit(1)
+            ->offset(0)
+            ->select()
+            ->sql();
+
+        $message = $this->getConnection()->query($sql)->fetch_assoc();
+
+        return $message;
+    }
+
+    public function getDialogIdFromMessage($messageId)
+    {
+        $sql = $this->sparrow
+            ->from(self::getTableName())
+            ->where(array('id' => $messageId))
+            ->select(array('dialog_id'))
+            ->sql();
+
+        return $this->getConnection()->query($sql)->fetch_assoc()['dialog_id'];
+    }
+
+    public function markAsRead($messageId)
+    {
+        $sql = $this->sparrow
+            ->from(self::getTableName())
+            ->where(array('id' => $messageId))
+            ->update(array('read_state' => 1))
+            ->sql();
+
+        return $this->getConnection()->query($sql);
+    }
 }
