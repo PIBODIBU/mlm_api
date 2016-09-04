@@ -2,6 +2,7 @@
 
 require_once 'AbstractHandler.php';
 require_once dirname(__DIR__) . "/../model/User.php";
+require_once dirname(__DIR__) . "/../config/loc_config.php";
 
 class UsersHandler extends AbstractHandler
 {
@@ -24,6 +25,7 @@ class UsersHandler extends AbstractHandler
             'surname',
             'email',
             'phone',
+            'photo_name',
             'username',
             'password',
             'refer',
@@ -56,6 +58,7 @@ class UsersHandler extends AbstractHandler
             $mysql_result['name'],
             $mysql_result['surname'],
             $mysql_result['email'],
+            $mysql_result['photo_name'],
             $mysql_result['phone'],
             $mysql_result['username'],
             $mysql_result['password'],
@@ -74,7 +77,6 @@ class UsersHandler extends AbstractHandler
     {
         $sql = $this->sparrow
             ->from(self::getTableName())
-            ->select()
             ->where(array('email' => $email), true)
             ->select(array_diff($this->getTableSchema(), $ignoreFields))
             ->sql();
@@ -94,9 +96,36 @@ class UsersHandler extends AbstractHandler
         }
     }
 
+    public function uploadAvatar($avatar, User $user)
+    {
+        $fileName = APISec::generate_file_name();
+        $fileLocation = UPLOAD_DIRECTORY . $fileName;
+        $fileExtension = pathinfo($avatar['name'], PATHINFO_EXTENSION);
+        $fileLocation .= '.' . $fileExtension;
+
+        if (!move_uploaded_file($avatar['tmp_name'], $fileLocation)) {
+            return false;
+        }
+
+        $fileName .= '.' . $fileExtension;
+
+        $sql = $this->sparrow
+            ->from(self::getTableName())
+            ->where(array('uuid' => $user->getUUID()), true)
+            ->update(array('photo_name' => $fileName))
+            ->sql();
+
+        return $this->getConnection()->query($sql);
+    }
+
     public function getUserByUUID($uuid, $convertToObject = false, $ignoreFields = array())
     {
-        $sql = "SELECT * FROM " . $this->getTableName() . " WHERE BINARY uuid='$uuid'";
+        $sql = $this->sparrow
+            ->from(self::getTableName())
+            ->where(array('uuid' => $uuid), true)
+            ->select(array_diff($this->getTableSchema(), $ignoreFields))
+            ->sql();
+
         $result = $this->getConnection()->query($sql)->fetch_assoc();
 
         if (!isset($result)) {
@@ -104,6 +133,7 @@ class UsersHandler extends AbstractHandler
         }
 
         $result = $this->removeIgnoreFields($result, $ignoreFields);
+        $this->transformPhotoUrl($result);
 
         if ($convertToObject) {
             return $this->toObject($result);
@@ -140,7 +170,7 @@ class UsersHandler extends AbstractHandler
 
         $sql = $this->sparrow
             ->from(self::getTableName())
-            ->where(array('uuid' => $user->getUuid()), true)
+            ->where(array('uuid' => $user->getUUID()), true)
             ->update(array('password' => password_hash($newPassword, PASSWORD_BCRYPT, ['cost' => PASSWORD_ENCRYPTION_COST])))
             ->sql();
 
@@ -159,5 +189,10 @@ class UsersHandler extends AbstractHandler
         $sql = "SELECT * FROM " . $this->getTableName() . " WHERE BINARY username='$username'";
         $result = $this->getConnection()->query($sql)->fetch_assoc();
         return isset($result);
+    }
+
+    public function transformPhotoUrl($mysqliResult)
+    {
+        $mysqliResult['photo_name'] = UPLOADS_DIR_URL . $mysqliResult['photo_name'];
     }
 }

@@ -72,7 +72,7 @@ abstract class AbstractHandler
         $result = $this->getConnection()->query($sql);
 
         while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
-            $response[] = $this->removeIgnoreFields($row, $ignoreFields);
+            $response[] = $row;
         }
 
         return $response;
@@ -105,8 +105,6 @@ abstract class AbstractHandler
         if (!isset($result)) {
             return NULL;
         }
-
-        $result = $this->removeIgnoreFields($result, $ignoreFields);
 
         if ($convertToObject) {
             return $this->toObject($result);

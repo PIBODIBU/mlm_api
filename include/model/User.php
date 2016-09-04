@@ -11,6 +11,7 @@ class User extends AbstractModel
     private $surname;
     private $email;
     private $phone;
+    private $photoName;
     private $username;
     private $password;
     private $refer;
@@ -25,6 +26,7 @@ class User extends AbstractModel
                                 $surname,
                                 $email,
                                 $phone,
+                                $photoName,
                                 $username = "",
                                 $password = "",
                                 $refer,
@@ -40,6 +42,7 @@ class User extends AbstractModel
         $this->surname = $surname;
         $this->email = $email;
         $this->phone = $phone;
+        $this->photoName = $photoName;
         $this->username = $username;
         $this->password = $password;
         $this->refer = $refer;
@@ -58,6 +61,7 @@ class User extends AbstractModel
             $this->surname,
             $this->email,
             $this->phone,
+            $this->photoName,
             $this->username,
             $this->password,
             $this->refer,
@@ -74,11 +78,12 @@ class User extends AbstractModel
             $this->surname,
             $this->email,
             $this->phone,
+            $this->photoName,
             $this->isOnline
         );
     }
 
-    public function getUuid(): string
+    public function getUUID(): string
     {
         return $this->uuid;
     }
@@ -111,6 +116,11 @@ class User extends AbstractModel
     public function getPhone()
     {
         return $this->phone;
+    }
+
+    public function getPhotoName()
+    {
+        return $this->photoName;
     }
 
     public function getUsername(): string

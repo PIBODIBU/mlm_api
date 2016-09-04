@@ -9,6 +9,8 @@ require_once '../include/db/handlers/UsersHandler.php';
 require_once '../include/db/handlers/TimerHandler.php';
 require_once '../include/db/handlers/BankInfoHandler.php';
 require_once '../include/db/handlers/ShippingInfoHandler.php';
+require_once '../include/db/handlers/MessagesHandler.php';
+require_once '../include/db/handlers/DialogsHandler.php';
 
 require_once '../include/security/UUID.php';
 require_once '../include/security/APISecSec.php';
@@ -39,10 +41,10 @@ Flight::route('/test/upload', function () {
     $response = array();
     $fileName = APISec::generate_file_name();
     $uploadFile = UPLOAD_DIRECTORY . $fileName;
-    $fileExtension = pathinfo($_FILES['userfile']['name'], PATHINFO_EXTENSION);
+    $fileExtension = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
     $uploadFile .= '.' . $fileExtension;
 
-    if (move_uploaded_file($_FILES['userfile']['tmp_name'], $uploadFile)) {
+    if (move_uploaded_file($_FILES['avatar']['tmp_name'], $uploadFile)) {
         $response['error'] = FALSE;
         $response['error_message'] = "File successfully uploaded.";
         $response['photo_url'] = UPLOADS_DIR_URL . $fileName .= '.' . $fileExtension;
@@ -54,6 +56,7 @@ Flight::route('/test/upload', function () {
     Flight::json($response);
 });
 
+// TODO update docs
 /**
  * @api {post} /register Register
  * @apiDescription Register in the app.
@@ -67,6 +70,7 @@ Flight::route('/test/upload', function () {
  * @apiParam (Main info) {String} username Username.
  * @apiParam (Main info) {String} password Password.
  * @apiParam (Main info) {String} refer Username of the referrer.
+ * @apiParam (Main info) {Object} Multipart file - user's photo.
  * @apiParam (Shipping info) {String} shipping_name Name.
  * @apiParam (Shipping info) {String} shipping_surname Surname.
  * @apiParam (Shipping info) {String} shipping_address Full address.
@@ -230,6 +234,9 @@ Flight::route('POST /register', function () {
     ) {
         Flight::jsonError(true, "Error occurred during registration");
     }
+
+    // User photo
+    $userHandler->uploadAvatar($_FILES['photo'], $user);
 
     Flight::json(addErrorStatusToArray(
         $userHandler->getUserByUUID($uuid, false, array('username', 'password')), false, ""));
@@ -395,6 +402,66 @@ Flight::route('GET /users', function () {
     }
 
     Flight::json($userHandler->getAll($userHandler->getPrivateSchema(), $limit, $offset));
+});
+
+Flight::route('GET /dialogs/get', function () {
+    verifyRequiredParams(array('api_key', 'limit', 'offset', 'signature'));
+
+    $connection = DbConnect::connect();
+    $userHandler = new UsersHandler($connection);
+    $dialogsHandler = new DialogsHandler($connection);
+    $dbSecurity = new DB_Security($connection);
+
+    $limit = $_GET['limit'];
+    $offset = $_GET['offset'];
+    $apiKey = $_GET['api_key'];
+    $signature = $_GET['signature'];
+
+    if (!$dbSecurity->verifyUserApiKey($apiKey)) {
+        Flight::jsonError(true, 'Bad api key', ERROR_BAD_API_KEY);
+    }
+
+    if (!$dbSecurity->validateSignature(array($limit, $offset), $signature, $apiKey)) {
+        Flight::jsonError(true, 'Bad signature', ERROR_BAD_SIGNATURE);
+    }
+
+    $user = $userHandler->get(true, array(), new Filter('api_key', $apiKey));
+
+    if ($user === NULL) {
+        Flight::jsonError(TRUE, 'User not found', ERROR_USER_NOT_FOUND);
+    }
+
+    Flight::json($dialogsHandler->getDialogs($user->getUUID()));
+});
+
+Flight::route('GET /messages/get/@dialog_id:[0-9]+', function ($dialogId) {
+    $connection = DbConnect::connect();
+    $messagesHandler = new MessagesHandler($connection);
+    $dialogsHandler = new DialogsHandler($connection);
+    $dbSecurity = new DB_Security($connection);
+
+    $limit = $_GET['limit'];
+    $offset = $_GET['offset'];
+    $apiKey = $_GET['api_key'];
+    $signature = $_GET['signature'];
+
+    if (!$dbSecurity->verifyUserApiKey($apiKey)) {
+        Flight::jsonError(true, 'Bad api key', ERROR_BAD_API_KEY);
+    }
+
+    if (!$dbSecurity->validateSignature(array($limit, $offset), $signature, $apiKey)) {
+        Flight::jsonError(true, 'Bad signature', ERROR_BAD_SIGNATURE);
+    }
+
+    if (!$dialogsHandler->isDialogExists($dialogId)) {
+        Flight::jsonError(true, 'Dialog does not exists', ERROR_DIALOG_NOT_EXISTS);
+    }
+
+    if (!$dbSecurity->isMyDialog($apiKey, $dialogId)) {
+        Flight::jsonError(true, 'It is not your dialog', ERROR_NOT_YOUR_DIALOG);
+    }
+
+    Flight::json($messagesHandler->getAll(array(), $limit, $offset, new Filter('dialog_id', $dialogId)));
 });
 
 /**

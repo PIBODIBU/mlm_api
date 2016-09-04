@@ -3,6 +3,7 @@
 require_once dirname(__DIR__) . '/db/db_connect.php';
 require_once dirname(__DIR__) . '/db/handlers/UsersHandler.php';
 require_once dirname(__DIR__) . '/db/handlers/RestoreCodeHandler.php';
+require_once dirname(__DIR__) . '/db/handlers/DialogsHandler.php';
 
 define('PASSWORD_ENCRYPTION_COST', 12);
 
@@ -93,6 +94,24 @@ class DB_Security
         $result = $this->connection->query("SELECT * FROM users WHERE BINARY api_key='$apiKey'");
         $user = $result->fetch_assoc();
         return isset($user) ? $user['client_secret'] : "";
+    }
+
+    public function isMyDialog($apiKey, $dialogId)
+    {
+        $userHandler = new UsersHandler($this->getConnection());
+        $dialogsHandler = new DialogsHandler($this->getConnection());
+        $user = $userHandler->get(true, array(), new Filter('api_key', $apiKey));
+
+        $dialog = $dialogsHandler->get(true, array(), new Filter('id', $dialogId));
+
+        if ($dialog === NULL) {
+            return false;
+        }
+
+        if ($dialog->getPeerUUID() == $user->getUUID() || $dialog->getOwnerUUID() == $user->getUUID())
+            return true;
+        else
+            return false;
     }
 
     /**
