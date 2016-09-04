@@ -315,10 +315,10 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/dialogs/:id",
-    "title": "Get dialogs",
-    "description": "<p>Get list of user's dialogs.</p>",
-    "name": "GetDialogsList",
+    "url": "/dialogs/create",
+    "title": "Create dialog",
+    "description": "<p>Create new dialog with specified user.</p>",
+    "name": "GetCreateDialog",
     "group": "Dialogs",
     "parameter": {
       "fields": {
@@ -328,14 +328,21 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "api_key",
-            "description": "<p>User's APi key.</p>"
+            "description": "<p>User's API key.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "peer_uuid",
+            "description": "<p>Peer UUID.</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": false,
             "field": "signature",
-            "description": "<p>MD5 signature (path,secret).</p>"
+            "description": "<p>MD5 signature - peer_uuid, secret.</p>"
           }
         ]
       }
@@ -345,10 +352,10 @@ define({ "api": [
         "Success 200": [
           {
             "group": "Success 200",
-            "type": "Object[]",
+            "type": "Object",
             "optional": false,
             "field": "dialog",
-            "description": "<p>Dialog</p>"
+            "description": "<p>Dialog.</p>"
           }
         ]
       }
@@ -361,7 +368,7 @@ define({ "api": [
             "type": "Boolean",
             "optional": false,
             "field": "error",
-            "description": "<p>Error      status</p>"
+            "description": "<p>Error status</p>"
           },
           {
             "group": "Error 4xx",
@@ -385,6 +392,424 @@ define({ "api": [
     "groupTitle": "Dialogs"
   },
   {
+    "type": "get",
+    "url": "/dialogs",
+    "title": "Get dialogs",
+    "description": "<p>Get user's list of dialogs.</p>",
+    "name": "GetDialog",
+    "group": "Dialogs",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "api_key",
+            "description": "<p>User's API key.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "limit",
+            "description": "<p>Result limit.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "offset",
+            "description": "<p>Result offset.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "signature",
+            "description": "<p>MD5 signature - limit, offset, secret.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "dialogs",
+            "description": "<p>Dialogs.</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error status</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "error_message",
+            "description": "<p>Description of the error</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "error_code",
+            "description": "<p>Identifier of the error</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "mlm_rest_api/v1/index.php",
+    "groupTitle": "Dialogs"
+  },
+  {
+    "type": "get",
+    "url": "/dialogs/:id",
+    "title": "Get dialog by id",
+    "description": "<p>Get one dialog by its id.</p>",
+    "name": "GetDialogById",
+    "group": "Dialogs",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "api_key",
+            "description": "<p>User's API key.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "signature",
+            "description": "<p>MD5 signature - id (path), secret.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "dialog",
+            "description": "<p>Dialog.</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error status</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "error_message",
+            "description": "<p>Description of the error</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "error_code",
+            "description": "<p>Identifier of the error</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "mlm_rest_api/v1/index.php",
+    "groupTitle": "Dialogs"
+  },
+  {
+    "type": "get",
+    "url": "/messages/:message_id/important",
+    "title": "Mark as important",
+    "description": "<p>Mark message as important or common.</p>",
+    "name": "GetMarkMessageAsImportant",
+    "group": "Messages",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "api_key",
+            "description": "<p>User's API key.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Boolean",
+            "optional": false,
+            "field": "important",
+            "description": "<p>0 - mark as common, 1 - mark as important.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "signature",
+            "description": "<p>MD5 signature - id (path), secret.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error status</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "error_message",
+            "description": "<p>Description of the error</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "error_code",
+            "description": "<p>Identifier of the error</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error status</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "error_message",
+            "description": "<p>Description of the error</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "error_code",
+            "description": "<p>Identifier of the error</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "mlm_rest_api/v1/index.php",
+    "groupTitle": "Messages"
+  },
+  {
+    "type": "get",
+    "url": "/messages/:message_id/read",
+    "title": "Mark as read",
+    "description": "<p>Mark message as read.</p>",
+    "name": "GetMarkMessageAsRead",
+    "group": "Messages",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "api_key",
+            "description": "<p>User's API key.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "signature",
+            "description": "<p>MD5 signature - id (path), secret.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error status</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "error_message",
+            "description": "<p>Description of the error</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "error_code",
+            "description": "<p>Identifier of the error</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error status</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "error_message",
+            "description": "<p>Description of the error</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "error_code",
+            "description": "<p>Identifier of the error</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "mlm_rest_api/v1/index.php",
+    "groupTitle": "Messages"
+  },
+  {
+    "type": "get",
+    "url": "/messages/:dialog_id",
+    "title": "Get dialog messages",
+    "description": "<p>Get list of dialog messages.</p>",
+    "name": "GetMessagesOfDialog",
+    "group": "Messages",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "api_key",
+            "description": "<p>User's API key.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "limit",
+            "description": "<p>Result limit.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "offset",
+            "description": "<p>Result offset.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "signature",
+            "description": "<p>MD5 signature - limit, offset, secret.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "messages",
+            "description": "<p>Messages.</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error status</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "error_message",
+            "description": "<p>Description of the error</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "error_code",
+            "description": "<p>Identifier of the error</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "mlm_rest_api/v1/index.php",
+    "groupTitle": "Messages"
+  },
+  {
     "type": "post",
     "url": "/restore/code",
     "title": "Request code",
@@ -400,6 +825,91 @@ define({ "api": [
             "optional": false,
             "field": "email",
             "description": "<p>User's email for password restoring.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error status</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "error_message",
+            "description": "<p>Description of the error</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "error_code",
+            "description": "<p>Identifier of the error</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error status</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "error_message",
+            "description": "<p>Description of the error</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "error_code",
+            "description": "<p>Identifier of the error</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "mlm_rest_api/v1/index.php",
+    "groupTitle": "Password_restore"
+  },
+  {
+    "type": "post",
+    "url": "/password/change",
+    "title": "Change password",
+    "description": "<p>Change password with restore code.</p>",
+    "name": "PostRestorePassword",
+    "group": "Password_restore",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "email",
+            "description": "<p>User's email for password restoring.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "restore_code",
+            "description": "<p>Restore code for password changing.</p>"
           }
         ]
       }
@@ -519,33 +1029,5 @@ define({ "api": [
     "version": "0.0.0",
     "filename": "mlm_rest_api/v1/index.php",
     "groupTitle": "User"
-  },
-  {
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "optional": false,
-            "field": "varname1",
-            "description": "<p>No type.</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "String",
-            "optional": false,
-            "field": "varname2",
-            "description": "<p>With type.</p>"
-          }
-        ]
-      }
-    },
-    "type": "",
-    "url": "",
-    "version": "0.0.0",
-    "filename": "mlm_rest_api/docs/main.js",
-    "group": "_home_simple_Projects_PhpstormProjects_mlm_rest_api_docs_main_js",
-    "groupTitle": "_home_simple_Projects_PhpstormProjects_mlm_rest_api_docs_main_js",
-    "name": ""
   }
 ] });

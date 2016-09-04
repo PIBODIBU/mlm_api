@@ -96,24 +96,6 @@ class DB_Security
         return isset($user) ? $user['client_secret'] : "";
     }
 
-    public function isMyDialog($apiKey, $dialogId)
-    {
-        $userHandler = new UsersHandler($this->getConnection());
-        $dialogsHandler = new DialogsHandler($this->getConnection());
-        $user = $userHandler->get(true, array(), new Filter('api_key', $apiKey));
-
-        $dialog = $dialogsHandler->get(true, array(), new Filter('id', $dialogId));
-
-        if ($dialog === NULL) {
-            return false;
-        }
-
-        if ($dialog->getPeerUUID() == $user->getUUID() || $dialog->getOwnerUUID() == $user->getUUID())
-            return true;
-        else
-            return false;
-    }
-
     /**
      * SUPPORT METHODS
      */

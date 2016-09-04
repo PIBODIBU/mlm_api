@@ -38,25 +38,11 @@ Flight::map('jsonError', function ($error, $message, $error_code = NO_ERROR) {
 });
 
 Flight::route('/test/upload', function () {
-    $response = array();
-    $fileName = APISec::generate_file_name();
-    $uploadFile = UPLOAD_DIRECTORY . $fileName;
-    $fileExtension = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
-    $uploadFile .= '.' . $fileExtension;
-
-    if (move_uploaded_file($_FILES['avatar']['tmp_name'], $uploadFile)) {
-        $response['error'] = FALSE;
-        $response['error_message'] = "File successfully uploaded.";
-        $response['photo_url'] = UPLOADS_DIR_URL . $fileName .= '.' . $fileExtension;
-    } else {
-        $response['error'] = TRUE;
-        $response['error_message'] = "Upload failed";
-    }
-
-    Flight::json($response);
+    $connection = DbConnect::connect();
+    $userHandler = new UsersHandler($connection);
+    $userHandler->uploadAvatar($_FILES['avatar'], $userHandler->getUserByUsername('username', true));
 });
 
-// TODO update docs
 /**
  * @api {post} /register Register
  * @apiDescription Register in the app.
@@ -339,8 +325,24 @@ Flight::route('POST /restore/code', function () {
     }
 });
 
-// TODO write docs
-Flight::route('POST /restore/password', function () {
+/**
+ * @api {post} /password/change Change password
+ * @apiDescription Change password with restore code.
+ * @apiName PostRestorePassword
+ * @apiGroup Password restore
+ *
+ * @apiParam {String} email User's email for password restoring.
+ * @apiParam {String} restore_code Restore code for password changing.
+ *
+ * @apiSuccess {Boolean} error Error status
+ * @apiSuccess {String} error_message Description of the error
+ * @apiSuccess {Number} error_code Identifier of the error
+ *
+ * @apiError {Boolean} error Error status
+ * @apiError {String} error_message Description of the error
+ * @apiError {Number} error_code Identifier of the error
+ */
+Flight::route('POST /password/change', function () {
     verifyRequiredParams(array('email', 'restore_code', 'new_password'));
 
     $connection = DbConnect::connect();
@@ -404,6 +406,23 @@ Flight::route('GET /users', function () {
     Flight::json($userHandler->getAll($userHandler->getPrivateSchema(), $limit, $offset));
 });
 
+/**
+ * @api {get} /dialogs          Get dialogs
+ * @apiDescription Get user's list of dialogs.
+ * @apiName GetDialog
+ * @apiGroup Dialogs
+ *
+ * @apiParam {String} api_key       User's API key.
+ * @apiParam {Number} limit         Result limit.
+ * @apiParam {Number} offset        Result offset.
+ * @apiParam {String} signature     MD5 signature - limit, offset, secret.
+ *
+ * @apiSuccess {Object[]} dialogs       Dialogs.
+ *
+ * @apiError {Boolean} error            Error status
+ * @apiError {String} error_message     Description of the error
+ * @apiError {Number} error_code        Identifier of the error
+ */
 Flight::route('GET /dialogs', function () {
     verifyRequiredParams(array('api_key', 'limit', 'offset', 'signature'));
 
@@ -438,7 +457,21 @@ Flight::route('GET /dialogs', function () {
     Flight::json($dialogs);
 });
 
-// TODO write docs
+/**
+ * @api {get} /dialogs/:id      Get dialog by id
+ * @apiDescription Get one dialog by its id.
+ * @apiName GetDialogById
+ * @apiGroup Dialogs
+ *
+ * @apiParam {String} api_key       User's API key.
+ * @apiParam {String} signature     MD5 signature - id (path), secret.
+ *
+ * @apiSuccess {Object} dialog      Dialog.
+ *
+ * @apiError {Boolean} error            Error status
+ * @apiError {String} error_message     Description of the error
+ * @apiError {Number} error_code        Identifier of the error
+ */
 Flight::route('GET /dialogs/@id:[0-9]+', function ($dialogId) {
     verifyRequiredParams(array('api_key', 'signature'));
 
@@ -463,7 +496,84 @@ Flight::route('GET /dialogs/@id:[0-9]+', function ($dialogId) {
     Flight::json($dialogsHandler->getDialog($dialogId));
 });
 
-// TODO write docs
+/**
+ * @api {get} /dialogs/create      Create dialog
+ * @apiDescription Create new dialog with specified user.
+ * @apiName GetCreateDialog
+ * @apiGroup Dialogs
+ *
+ * @apiParam {String} api_key       User's API key.
+ * @apiParam {String} peer_uuid     Peer UUID.
+ * @apiParam {String} signature     MD5 signature - peer_uuid, secret.
+ *
+ * @apiSuccess {Object} dialog      Dialog.
+ *
+ * @apiError {Boolean} error            Error status
+ * @apiError {String} error_message     Description of the error
+ * @apiError {Number} error_code        Identifier of the error
+ */
+Flight::route('GET /dialogs/create', function () {
+    verifyRequiredParams(array('api_key', 'peer_uuid', 'signature'));
+
+    $connection = DbConnect::connect();
+    $dialogsHandler = new DialogsHandler($connection);
+    $usersHandler = new UsersHandler($connection);
+    $dbSecurity = new DB_Security($connection);
+
+    $apiKey = $_GET['api_key'];
+    $peerUUID = $_GET['peer_uuid'];
+    $signature = $_GET['signature'];
+
+    if (!$dbSecurity->verifyUserApiKey($apiKey)) {
+        Flight::jsonError(true, 'Bad api key', ERROR_BAD_API_KEY);
+    }
+
+    if (!$dbSecurity->validateSignature(array($peerUUID), $signature, $apiKey)) {
+        Flight::jsonError(true, 'Bad signature', ERROR_BAD_SIGNATURE);
+    }
+
+    // Get user
+    $user = $usersHandler->get(true, array(), new Filter('api_key', $apiKey));
+
+    if ($user === NULL) {
+        Flight::jsonError(TRUE, 'User not found', ERROR_USER_NOT_FOUND);
+    }
+
+    // Check if dialog already exists
+    $dialog = $dialogsHandler->isDialogAlreadyCreated($user->getUUID(), $peerUUID);
+    if ($dialog === false) {
+        // Dialog doesn't exist. Let's create new one
+        $dialog = $dialogsHandler->createDialog($user->getUUID(), $peerUUID);
+
+        if (!$dialog) {
+            echo $dialog;
+            //Flight::jsonError(true, "Internal server occurred. Please, try again later", ERROR_INTERNAL_SERVER);
+        } else {
+            echo $dialog;
+            //Flight::json(addErrorStatusToArray($dialogsHandler->getDialog($dialog)));
+        }
+    }
+
+    Flight::json(addErrorStatusToArray($dialog));
+});
+
+/**
+ * @api {get} /messages/:dialog_id          Get dialog messages
+ * @apiDescription Get list of dialog messages.
+ * @apiName GetMessagesOfDialog
+ * @apiGroup Messages
+ *
+ * @apiParam {String} api_key       User's API key.
+ * @apiParam {Number} limit         Result limit.
+ * @apiParam {Number} offset        Result offset.
+ * @apiParam {String} signature     MD5 signature - limit, offset, secret.
+ *
+ * @apiSuccess {Object[]} messages      Messages.
+ *
+ * @apiError {Boolean} error            Error status
+ * @apiError {String} error_message     Description of the error
+ * @apiError {Number} error_code        Identifier of the error
+ */
 Flight::route('GET /messages/@dialog_id:[0-9]+', function ($dialogId) {
     verifyRequiredParams(array('api_key', 'limit', 'offset', 'signature'));
 
@@ -496,9 +606,24 @@ Flight::route('GET /messages/@dialog_id:[0-9]+', function ($dialogId) {
     Flight::json($messagesHandler->getAll(array(), $limit, $offset, new Filter('dialog_id', $dialogId)));
 });
 
-// TODO write docs
-// Sig: message_id(path) + client_secret
-Flight::route('GET /messages/@id:[0-9]+/read', function ($messageId) {
+/**
+ * @api {post} /messages/:message_id/read    Mark as read
+ * @apiDescription Mark message as read.
+ * @apiName PostMarkMessageAsRead
+ * @apiGroup Messages
+ *
+ * @apiParam {String} api_key       User's API key.
+ * @apiParam {String} signature     MD5 signature - id (path), secret.
+ *
+ * @apiSuccess {Boolean} error            Error status
+ * @apiSuccess {String} error_message     Description of the error
+ * @apiSuccess {Number} error_code        Identifier of the error
+ *
+ * @apiError {Boolean} error            Error status
+ * @apiError {String} error_message     Description of the error
+ * @apiError {Number} error_code        Identifier of the error
+ */
+Flight::route('POST /messages/@id:[0-9]+/read', function ($messageId) {
     verifyRequiredParams(array('api_key', 'signature'));
 
     $connection = DbConnect::connect();
@@ -506,8 +631,8 @@ Flight::route('GET /messages/@id:[0-9]+/read', function ($messageId) {
     $dialogsHandler = new DialogsHandler($connection);
     $dbSecurity = new DB_Security($connection);
 
-    $apiKey = $_GET['api_key'];
-    $signature = $_GET['signature'];
+    $apiKey = $_POST['api_key'];
+    $signature = $_POST['signature'];
 
     if (!$dbSecurity->verifyUserApiKey($apiKey)) {
         Flight::jsonError(true, 'Bad api key', ERROR_BAD_API_KEY);
@@ -519,8 +644,12 @@ Flight::route('GET /messages/@id:[0-9]+/read', function ($messageId) {
 
     $dialogId = $messagesHandler->getDialogIdFromMessage($messageId);
 
-    if (!$dbSecurity->isMyDialog($apiKey, $dialogId)) {
+    if (!$dialogsHandler->isMyDialog($apiKey, $dialogId)) {
         Flight::jsonError(true, 'It is not your dialog', ERROR_NOT_YOUR_DIALOG);
+    }
+
+    if (!$dialogsHandler->amIRecipient($apiKey, $messageId)) {
+        Flight::jsonError(true, 'You are not recipient of this message', ERROR_NOT_RECIPIENT);
     }
 
     if (!$messagesHandler->markAsRead($messageId)) {
@@ -528,6 +657,57 @@ Flight::route('GET /messages/@id:[0-9]+/read', function ($messageId) {
     }
 
     Flight::jsonError(false, 'Message was marked as read', NO_ERROR);
+});
+
+/**
+ * @api {post} /messages/:message_id/important       Mark as important
+ * @apiDescription Mark message as important or common.
+ * @apiName PostMarkMessageAsImportant
+ * @apiGroup Messages
+ *
+ * @apiParam {String} api_key           User's API key.
+ * @apiParam {Boolean} important        0 - mark as common, 1 - mark as important.
+ * @apiParam {String} signature         MD5 signature - message_id (path), important ,secret.
+ *
+ * @apiSuccess {Boolean} error            Error status
+ * @apiSuccess {String} error_message     Description of the error
+ * @apiSuccess {Number} error_code        Identifier of the error
+ *
+ * @apiError {Boolean} error            Error status
+ * @apiError {String} error_message     Description of the error
+ * @apiError {Number} error_code        Identifier of the error
+ */
+Flight::route('POST /messages/@id:[0-9]+/important', function ($messageId) {
+    verifyRequiredParams(array('api_key', 'important', 'signature'));
+
+    $connection = DbConnect::connect();
+    $messagesHandler = new MessagesHandler($connection);
+    $dialogsHandler = new DialogsHandler($connection);
+    $dbSecurity = new DB_Security($connection);
+
+    $apiKey = $_POST['api_key'];
+    $important = $_POST['important'];
+    $signature = $_POST['signature'];
+
+    if (!$dbSecurity->verifyUserApiKey($apiKey)) {
+        Flight::jsonError(true, 'Bad api key', ERROR_BAD_API_KEY);
+    }
+
+    if (!$dbSecurity->validateSignature(array($messageId, $important), $signature, $apiKey)) {
+        Flight::jsonError(true, 'Bad signature', ERROR_BAD_SIGNATURE);
+    }
+
+    $dialogId = $messagesHandler->getDialogIdFromMessage($messageId);
+
+    if (!$dialogsHandler->isMyDialog($apiKey, $dialogId)) {
+        Flight::jsonError(true, 'It is not your dialog', ERROR_NOT_YOUR_DIALOG);
+    }
+
+    if (!$messagesHandler->markImportant($messageId, $important)) {
+        Flight::jsonError(true, 'Server error occurred', ERROR_INTERNAL_SERVER);
+    }
+
+    Flight::jsonError(false, 'Message was marked', NO_ERROR);
 });
 
 /**

@@ -15,6 +15,8 @@ class MessagesHandler extends AbstractHandler
     {
         return array(
             'id',
+            'sender_uuid',
+            'recipient_uuid',
             'date',
             'dialog_id',
             'important',
@@ -27,6 +29,8 @@ class MessagesHandler extends AbstractHandler
     {
         return array(
             'id',
+            'sender_uuid',
+            'recipient_uuid',
             'date',
             'dialog_id',
             'important',
@@ -39,6 +43,8 @@ class MessagesHandler extends AbstractHandler
     {
         return new Message(
             $mysql_result['id'],
+            $mysql_result['sender_uuid'],
+            $mysql_result['recipient_uuid'],
             $mysql_result['date'],
             $mysql_result['dialog_id'],
             $mysql_result['important'],
@@ -87,5 +93,34 @@ class MessagesHandler extends AbstractHandler
             ->sql();
 
         return $this->getConnection()->query($sql);
+    }
+
+    public function markImportant($messageId, $important)
+    {
+        $sql = $this->sparrow
+            ->from(self::getTableName())
+            ->where(array('id' => $messageId))
+            ->update(array('important' => $important))
+            ->sql();
+
+        return $this->getConnection()->query($sql);
+    }
+
+    public function isMyMessage($apiKey, $dialogId)
+    {
+        $userHandler = new UsersHandler($this->getConnection());
+        $dialogsHandler = new DialogsHandler($this->getConnection());
+        $user = $userHandler->get(true, array(), new Filter('api_key', $apiKey));
+
+        $dialog = $dialogsHandler->get(true, array(), new Filter('id', $dialogId));
+
+        if ($dialog === NULL) {
+            return false;
+        }
+
+        if ($dialog->getPeerUUID() == $user->getUUID() || $dialog->getOwnerUUID() == $user->getUUID())
+            return true;
+        else
+            return false;
     }
 }

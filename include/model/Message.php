@@ -5,14 +5,18 @@ require_once 'AbstractModel.php';
 class Message extends AbstractModel
 {
     private $id;
+    private $senderUUID;
+    private $recipientUUID;
     public $date;
     public $dialogId;
     public $important;
     public $body;
 
-    public function __construct($id, $date, $dialogId, $important, $body)
+    public function __construct($id, $sender_uuid, $recipient_uuid, $date, $dialogId, $important, $body)
     {
         $this->id = $id;
+        $this->senderUUID = $sender_uuid;
+        $this->recipientUUID = $recipient_uuid;
         $this->date = $date;
         $this->dialogId = $dialogId;
         $this->important = $important;
@@ -23,6 +27,8 @@ class Message extends AbstractModel
     {
         return array(
             $this->id,
+            $this->senderUUID,
+            $this->recipientUUID,
             $this->date,
             $this->dialogId,
             $this->important,
@@ -34,6 +40,8 @@ class Message extends AbstractModel
     {
         return array(
             $this->id,
+            $this->senderUUID,
+            $this->recipientUUID,
             $this->date,
             $this->dialogId,
             $this->important,
@@ -49,6 +57,26 @@ class Message extends AbstractModel
     public function setId($id)
     {
         $this->id = $id;
+    }
+
+    public function getSenderUUID()
+    {
+        return $this->senderUUID;
+    }
+
+    public function setSenderUUID($senderUUID)
+    {
+        $this->senderUUID = $senderUUID;
+    }
+
+    public function getRecipientUUID()
+    {
+        return $this->recipientUUID;
+    }
+
+    public function setRecipientUUID($recipientUUID)
+    {
+        $this->recipientUUID = $recipientUUID;
     }
 
     public function getDate()

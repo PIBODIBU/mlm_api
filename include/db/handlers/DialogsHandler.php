@@ -56,6 +56,21 @@ class DialogsHandler extends AbstractHandler
         return $dialog;
     }
 
+    public function createDialog($userUUID, $peerUUID)
+    {
+        $sql = $this->sparrow
+            ->from($this->getTableName())
+            ->insert(array(
+                'owner_uuid' => $userUUID,
+                'peer_uuid' => $peerUUID
+            ))
+            ->execute();
+
+        $result = $this->getConnection()->query($sql);
+        return $this->sparrow->insert_id;
+        return $result ? $this->sparrow->insert_id : $result;
+    }
+
     public function getDialogs($userUUID)
     {
         $messagesHandler = new MessagesHandler($this->getConnection());
@@ -84,9 +99,60 @@ class DialogsHandler extends AbstractHandler
         return $response;
     }
 
+    public function isDialogAlreadyCreated($userUUID, $peerUUID)
+    {
+        $dialog = $this->get(false, array(), new Filter('owner_uuid', $userUUID), new Filter('peer_uuid', $peerUUID));
+        if (isset($dialog)) {
+            return $dialog;
+        }
+
+        $dialog = $this->get(false, array(), new Filter('owner_uuid', $peerUUID), new Filter('peer_uuid', $userUUID));
+        if (isset($dialog)) {
+            return $dialog;
+        }
+
+        return false;
+    }
+
     public function isDialogExists($dialogId)
     {
         $dialog = $this->get(false, array(), new Filter('id', $dialogId));
         return isset($dialog);
+    }
+
+    public function isMyDialog($apiKey, $dialogId)
+    {
+        $userHandler = new UsersHandler($this->getConnection());
+        $dialogsHandler = new DialogsHandler($this->getConnection());
+        $user = $userHandler->get(true, array(), new Filter('api_key', $apiKey));
+
+        $dialog = $dialogsHandler->get(true, array(), new Filter('id', $dialogId));
+
+        if ($dialog === NULL) {
+            return false;
+        }
+
+        if ($dialog->getPeerUUID() == $user->getUUID() || $dialog->getOwnerUUID() == $user->getUUID())
+            return true;
+        else
+            return false;
+    }
+
+    public function amIRecipient($apiKey, $messageId)
+    {
+        $userHandler = new UsersHandler($this->getConnection());
+        $messagesHandler = new MessagesHandler($this->getConnection());
+        $user = $userHandler->get(true, array(), new Filter('api_key', $apiKey));
+
+        $message = $messagesHandler->get(true, array(), new Filter('id', $messageId));
+
+        if ($message === NULL) {
+            return false;
+        }
+
+        if ($message->getRecipientUUID() == $user->getUUID())
+            return true;
+        else
+            return false;
     }
 }
