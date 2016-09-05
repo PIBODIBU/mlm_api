@@ -28,6 +28,7 @@ class UsersHandler extends AbstractHandler
             'photo_name',
             'username',
             'password',
+            'fcm_id',
             'refer',
             'created_at',
             'last_login',
@@ -43,6 +44,7 @@ class UsersHandler extends AbstractHandler
             'client_secret',
             'username',
             'password',
+            'fcm_id',
             'refer',
             'created_at',
             'last_login',
@@ -62,6 +64,7 @@ class UsersHandler extends AbstractHandler
             $mysql_result['phone'],
             $mysql_result['username'],
             $mysql_result['password'],
+            $mysql_result['fcm_id'],
             $mysql_result['refer'],
             $mysql_result['created_at'],
             $mysql_result['last_login'],
@@ -158,6 +161,16 @@ class UsersHandler extends AbstractHandler
         } else {
             return $result;
         }
+    }
+
+    public function isReferValid($referUsername)
+    {
+        $referAsUser = $this->sparrow
+            ->from(self::getTableName())
+            ->where(array('username' => $referUsername), true)
+            ->select()
+            ->sql();
+        return $referAsUser;
     }
 
     public function changePassword($email, $newPassword):bool

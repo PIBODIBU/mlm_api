@@ -11,6 +11,7 @@ require_once '../include/db/handlers/BankInfoHandler.php';
 require_once '../include/db/handlers/ShippingInfoHandler.php';
 require_once '../include/db/handlers/MessagesHandler.php';
 require_once '../include/db/handlers/DialogsHandler.php';
+require_once '../include/db/handlers/RequestsHandler.php';
 
 require_once '../include/security/UUID.php';
 require_once '../include/security/APISecSec.php';
@@ -108,12 +109,13 @@ Flight::route('POST /register', function () {
         'bank_personal_code',
     ));
 
-    $dbConnection = DbConnect::connect();
+    $connection = DbConnect::connect();
 
-    $userHandler = new UsersHandler($dbConnection);
-    $timerHandler = new TimerHandler($dbConnection);
-    $shippingHandler = new ShippingInfoHandler($dbConnection);
-    $bankInfoHandler = new BankInfoHandler($dbConnection);
+    $userHandler = new UsersHandler($connection);
+    $timerHandler = new TimerHandler($connection);
+    $shippingHandler = new ShippingInfoHandler($connection);
+    $bankInfoHandler = new BankInfoHandler($connection);
+    $requestsHandler = new RequestsHandler($connection);
 
     // Main info
     $name = $_POST['name'];
@@ -169,6 +171,9 @@ Flight::route('POST /register', function () {
     if ($bankInfoHandler->isPersonalCodeOccupied($bankPersonalCode)) {
         Flight::jsonError(TRUE, "Personal code is already taken", ERROR_PERSONAL_CODE_CODE_ALREADY_TAKEN);
     }
+    if (!$userHandler->isReferValid($refer)) {
+        Flight::jsonError(TRUE, "Referrer's username is not valid", ERROR_REFER_NOT_VALID);
+    }
 
     $user = new User(
         $uuid,
@@ -178,8 +183,10 @@ Flight::route('POST /register', function () {
         $surname,
         $email,
         $phone,
+        "", // Yep. This is empty param.
         $username,
         password_hash($password, PASSWORD_BCRYPT, ['cost' => PASSWORD_ENCRYPTION_COST]),
+        "", // Yep. This is empty param.
         $refer,
         $createdAt,
         $lastLogin,
@@ -221,6 +228,9 @@ Flight::route('POST /register', function () {
 
     // User photo
     $userHandler->uploadAvatar($_FILES['photo'], $user);
+
+    // Create request for parent
+    $requestsHandler->createRequest($userHandler->getUserByUsername($refer, true)->getUUID(), $user->getUUID());
 
     Flight::json(addErrorStatusToArray(
         $userHandler->getUserByUUID($uuid, false, array('username', 'password')), false, ""));
@@ -797,6 +807,28 @@ Flight::route('POST /messages/@id:[0-9]+/important', function ($messageId) {
     Flight::jsonError(false, 'Message was marked', NO_ERROR);
 });
 
+/**
+ * @api {get} /children/accept       Accept child request
+ * @apiDescription Mark message as important or common.
+ * @apiName GetChildrenAcceptRequest
+ * @apiGroup Children
+ *
+ * @apiParam {String} api_key           User's API key.
+ * @apiParam {String} signature         MD5 signature - 1, secret.
+ *
+ * @apiSuccess {Object} error                     Error information
+ * @apiSuccess {Boolean} error.error              Error status
+ * @apiSuccess {String} error.error_message       Description of the error
+ * @apiSuccess {Number} error.error_code          Identifier of the error
+ *
+ * @apiError {Object} error                     Error information
+ * @apiError {Boolean} error.error              Error status
+ * @apiError {String} error.error_message       Description of the error
+ * @apiError {Number} error.error_code          Identifier of the error
+ */
+Flight::route('GET /children/accept', function () {
+
+});
 /**
  * Get user's timer
  */

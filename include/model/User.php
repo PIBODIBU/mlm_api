@@ -14,6 +14,7 @@ class User extends AbstractModel
     private $photoName;
     private $username;
     private $password;
+    private $FCMId;
     private $refer;
     private $createdAt;
     private $lastLogin;
@@ -29,6 +30,7 @@ class User extends AbstractModel
                                 $photoName,
                                 $username = "",
                                 $password = "",
+                                $FCMId = "",
                                 $refer,
                                 $createdAt,
                                 $lastLogin,
@@ -45,6 +47,7 @@ class User extends AbstractModel
         $this->photoName = $photoName;
         $this->username = $username;
         $this->password = $password;
+        $this->FCMId = $FCMId;
         $this->refer = $refer;
         $this->createdAt = $createdAt;
         $this->lastLogin = $lastLogin;
@@ -64,6 +67,7 @@ class User extends AbstractModel
             $this->photoName,
             $this->username,
             $this->password,
+            $this->FCMId,
             $this->refer,
             $this->createdAt,
             $this->lastLogin,
@@ -131,6 +135,11 @@ class User extends AbstractModel
     public function getPassword(): string
     {
         return $this->password;
+    }
+
+    public function getFCMId(): string
+    {
+        return $this->FCMId;
     }
 
     public function getRefer()
