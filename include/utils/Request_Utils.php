@@ -3,23 +3,23 @@
 /**
  * Verifying required params posted or not
  */
-function verifyRequiredParams($required_fields)
+function verifyRequiredParams($requiredFields)
 {
     $error = false;
-    $error_fields = "";
-    $request_params = $_REQUEST;
+    $errorFields = "";
+    $requestParams = $_REQUEST;
 
     // Handling PUT request params
     if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
-        parse_str(file_get_contents('php://input'), $request_params);
+        parse_str(file_get_contents('php://input'), $requestParams);
     }
 
-    foreach ($required_fields as $field) {
+    foreach ($requiredFields as $field) {
         // Array parser
         if (is_array($field)) {
             $passed = false;
             foreach ($field as $arrayField) {
-                if (isset($request_params[$arrayField]) && strlen(trim($request_params[$arrayField])) > 0) {
+                if (isset($requestParams[$arrayField]) && strlen(trim($requestParams[$arrayField])) > 0) {
                     $passed = true;
                     break;
                 }
@@ -28,7 +28,7 @@ function verifyRequiredParams($required_fields)
             if (!$passed) {
                 $error = true;
                 foreach ($field as $arrayField) {
-                    $error_fields .= $arrayField . '/';
+                    $errorFields .= $arrayField . '/';
                 }
             }
 
@@ -36,23 +36,23 @@ function verifyRequiredParams($required_fields)
         }
 
         // Normal param parser
-        if (!isset($request_params[$field]) || strlen(trim($request_params[$field])) <= 0) {
+        if (!isset($requestParams[$field]) || strlen(trim($requestParams[$field])) <= 0) {
             $error = true;
-            $error_fields .= $field . ', ';
+            $errorFields .= $field . ', ';
         }
     }
 
     if ($error) {
-        Flight::jsonError(true, 'Required field(s) ' . substr($error_fields, 0, substr($error_fields, -2) == ', ' ? -2 : -1) . ' is missing or empty');
+        Flight::jsonError(true, 'Required field(s) ' . substr($errorFields, 0, substr($errorFields, -2) == ', ' ? -2 : -1) . ' is missing or empty');
     }
 }
 
 function addErrorStatusToArray($array = array(), $error = false, $error_msg = "", $error_code = NO_ERROR)
 {
     if (is_array($array)) {
-        $array['error'] = $error;
-        $array['error_message'] = $error_msg;
-        $array['error_code'] = $error_code;
+        $array['error']['error'] = $error;
+        $array['error']['error_message'] = $error_msg;
+        $array['error']['error_code'] = $error_code;
     }
 
     return $array;

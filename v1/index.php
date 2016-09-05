@@ -22,6 +22,7 @@ require_once '../include/utils/ErrorCodes.php';
 require_once '../include/config/loc_config.php';
 
 define('UPLOAD_DIRECTORY', dirname(__DIR__) . "/uploads/");
+define('MAX_MESSAGE_LENGTH', 1000);
 
 /**
  * METHODS MAPPING
@@ -30,10 +31,12 @@ define('UPLOAD_DIRECTORY', dirname(__DIR__) . "/uploads/");
 // Send error status & message via json
 Flight::map('jsonError', function ($error, $message, $error_code = NO_ERROR) {
     Flight::json(
-        $response = array(
-            'error' => $error,
-            'error_message' => $message,
-            'error_code' => $error_code
+        array('error' =>
+            array(
+                'error' => $error,
+                'error_message' => $message,
+                'error_code' => $error_code
+            )
         ));
 });
 
@@ -70,9 +73,10 @@ Flight::map('jsonError', function ($error, $message, $error_code = NO_ERROR) {
  * @apiSuccess {Object} bank_info Bank info.
  * @apiSuccess {Object} shipping_info Shipping info.
  *
- * @apiError {Boolean} error Error status
- * @apiError {String} error_message Description of the error
- * @apiError {Number} error_code Identifier of the error
+ * @apiError {Object} error                     Error information
+ * @apiError {Boolean} error.error              Error status
+ * @apiError {String} error.error_message       Description of the error
+ * @apiError {Number} error.error_code          Identifier of the error
  */
 Flight::route('POST /register', function () {
     verifyRequiredParams(array(
@@ -231,14 +235,14 @@ Flight::route('POST /register', function () {
  * @apiParam {String} username User's username.
  * @apiParam {String} password User's password.
  *
- *
  * @apiSuccess {Object} main_info Main user's info.
  * @apiSuccess {Object} bank_info Bank info.
  * @apiSuccess {Object} shipping_info Shipping info.
  *
- * @apiError {Boolean} error Error status
- * @apiError {String} error_message Description of the error
- * @apiError {Number} error_code Identifier of the error
+ * @apiError {Object} error                     Error information
+ * @apiError {Boolean} error.error              Error status
+ * @apiError {String} error.error_message       Description of the error
+ * @apiError {Number} error.error_code          Identifier of the error
  */
 Flight::route('POST /login', function () {
     verifyRequiredParams(array('username', 'password'));
@@ -328,13 +332,15 @@ Flight::route('POST /restore/code', function () {
  * @apiParam {String} email User's email for password restoring.
  * @apiParam {String} restore_code Restore code for password changing.
  *
- * @apiSuccess {Boolean} error Error status
- * @apiSuccess {String} error_message Description of the error
- * @apiSuccess {Number} error_code Identifier of the error
+ * @apiSuccess {Object} error                     Error information
+ * @apiSuccess {Boolean} error.error              Error status
+ * @apiSuccess {String} error.error_message       Description of the error
+ * @apiSuccess {Number} error.error_code          Identifier of the error
  *
- * @apiError {Boolean} error Error status
- * @apiError {String} error_message Description of the error
- * @apiError {Number} error_code Identifier of the error
+ * @apiError {Object} error                     Error information
+ * @apiError {Boolean} error.error              Error status
+ * @apiError {String} error.error_message       Description of the error
+ * @apiError {Number} error.error_code          Identifier of the error
  */
 Flight::route('POST /password/change', function () {
     verifyRequiredParams(array('email', 'restore_code', 'new_password'));
@@ -413,9 +419,10 @@ Flight::route('GET /users', function () {
  *
  * @apiSuccess {Object[]} dialogs       Dialogs.
  *
- * @apiError {Boolean} error            Error status
- * @apiError {String} error_message     Description of the error
- * @apiError {Number} error_code        Identifier of the error
+ * @apiError {Object} error                     Error information
+ * @apiError {Boolean} error.error              Error status
+ * @apiError {String} error.error_message       Description of the error
+ * @apiError {Number} error.error_code          Identifier of the error
  */
 Flight::route('GET /dialogs', function () {
     verifyRequiredParams(array('api_key', 'limit', 'offset', 'signature'));
@@ -462,9 +469,10 @@ Flight::route('GET /dialogs', function () {
  *
  * @apiSuccess {Object} dialog      Dialog.
  *
- * @apiError {Boolean} error            Error status
- * @apiError {String} error_message     Description of the error
- * @apiError {Number} error_code        Identifier of the error
+ * @apiError {Object} error                     Error information
+ * @apiError {Boolean} error.error              Error status
+ * @apiError {String} error.error_message       Description of the error
+ * @apiError {Number} error.error_code          Identifier of the error
  */
 Flight::route('GET /dialogs/@id:[0-9]+', function ($dialogId) {
     verifyRequiredParams(array('api_key', 'signature'));
@@ -491,7 +499,7 @@ Flight::route('GET /dialogs/@id:[0-9]+', function ($dialogId) {
 });
 
 /**
- * @api {get} /dialogs/create      Create dialog
+ * @api {post} /dialogs/create      Create dialog
  * @apiDescription Create new dialog with specified user.
  * @apiName GetCreateDialog
  * @apiGroup Dialogs
@@ -502,11 +510,12 @@ Flight::route('GET /dialogs/@id:[0-9]+', function ($dialogId) {
  *
  * @apiSuccess {Object} dialog      Dialog.
  *
- * @apiError {Boolean} error            Error status
- * @apiError {String} error_message     Description of the error
- * @apiError {Number} error_code        Identifier of the error
+ * @apiError {Object} error                     Error information
+ * @apiError {Boolean} error.error              Error status
+ * @apiError {String} error.error_message       Description of the error
+ * @apiError {Number} error.error_code          Identifier of the error
  */
-Flight::route('GET /dialogs/create', function () {
+Flight::route('POST /dialogs/create', function () {
     verifyRequiredParams(array('api_key', 'peer_uuid', 'signature'));
 
     $connection = DbConnect::connect();
@@ -514,9 +523,9 @@ Flight::route('GET /dialogs/create', function () {
     $usersHandler = new UsersHandler($connection);
     $dbSecurity = new DB_Security($connection);
 
-    $apiKey = $_GET['api_key'];
-    $peerUUID = $_GET['peer_uuid'];
-    $signature = $_GET['signature'];
+    $apiKey = $_POST['api_key'];
+    $peerUUID = $_POST['peer_uuid'];
+    $signature = $_POST['signature'];
 
     if (!$dbSecurity->verifyUserApiKey($apiKey)) {
         Flight::jsonError(true, 'Bad api key', ERROR_BAD_API_KEY);
@@ -540,11 +549,9 @@ Flight::route('GET /dialogs/create', function () {
         $dialog = $dialogsHandler->createDialog($user->getUUID(), $peerUUID);
 
         if (!$dialog) {
-            echo $dialog;
-            //Flight::jsonError(true, "Internal server occurred. Please, try again later", ERROR_INTERNAL_SERVER);
+            Flight::jsonError(true, "Internal server occurred. Please, try again later", ERROR_INTERNAL_SERVER);
         } else {
-            echo $dialog;
-            //Flight::json(addErrorStatusToArray($dialogsHandler->getDialog($dialog)));
+            Flight::json(addErrorStatusToArray($dialogsHandler->getDialog($dialog)));
         }
     }
 
@@ -564,9 +571,10 @@ Flight::route('GET /dialogs/create', function () {
  *
  * @apiSuccess {Object[]} messages      Messages.
  *
- * @apiError {Boolean} error            Error status
- * @apiError {String} error_message     Description of the error
- * @apiError {Number} error_code        Identifier of the error
+ * @apiError {Object} error                     Error information
+ * @apiError {Boolean} error.error              Error status
+ * @apiError {String} error.error_message       Description of the error
+ * @apiError {Number} error.error_code          Identifier of the error
  */
 Flight::route('GET /messages/@dialog_id:[0-9]+', function ($dialogId) {
     verifyRequiredParams(array('api_key', 'limit', 'offset', 'signature'));
@@ -607,28 +615,78 @@ Flight::route('GET /messages/@dialog_id:[0-9]+', function ($dialogId) {
  * @apiGroup Messages
  *
  * @apiParam {String} api_key           User's API key.
- * @apiParam (Switchable parameters (one must be filled))    {String} dialog_id         Dialog to send message.
- * @apiParam (Switchable parameters (one must be filled))    {String} recipient_uuid    User to send message.
+ * @apiParam {String} dialog_id         Dialog to send message.
  * @apiParam {String} message           Message body.
- * @apiParam {String} signature         MD5 signature - dialog_id/recipient_uuid, secret.
+ * @apiParam {String} signature         MD5 signature - dialog_id, secret.
  *
- * @apiSuccess {Boolean} error            Error status
- * @apiSuccess {String} error_message     Description of the error
- * @apiSuccess {Number} error_code        Identifier of the error
+ * @apiSuccess {String} id                        Message id
+ * @apiSuccess {String} sender_uuid               Sender UUID
+ * @apiSuccess {String} recipient_uuid            Recipient UUID
+ * @apiSuccess {String} dialog_id                 Message's dialog id
+ * @apiSuccess {String} important                 Message important state
+ * @apiSuccess {String} read_state                Message read state
+ * @apiSuccess {String} body                      Message body
+ * @apiSuccess {Object} error                     Error information
+ * @apiSuccess {Boolean} error.error              Error status
+ * @apiSuccess {String} error.error_message       Description of the error
+ * @apiSuccess {Number} error.error_code          Identifier of the error
  *
- * @apiError {Boolean} error            Error status
- * @apiError {String} error_message     Description of the error
- * @apiError {Number} error_code        Identifier of the error
+ * @apiError {Object} error                     Error information
+ * @apiError {Boolean} error.error              Error status
+ * @apiError {String} error.error_message       Description of the error
+ * @apiError {Number} error.error_code          Identifier of the error
  */
 Flight::route('POST /messages/send', function () {
-    verifyRequiredParams(array('api_key', 'signature', array('opt1', 'opt2')));
+    verifyRequiredParams(array('api_key', 'dialog_id', 'message', 'signature'));
 
     $connection = DbConnect::connect();
     $messagesHandler = new MessagesHandler($connection);
+    $usersHandler = new UsersHandler($connection);
     $dialogsHandler = new DialogsHandler($connection);
     $dbSecurity = new DB_Security($connection);
 
+    $apiKey = $_POST['api_key'];
     $dialogId = $_POST['dialog_id'];
+    $message = $_POST['message'];
+    $signature = $_POST['signature'];
+
+    if (strlen($message) > MAX_MESSAGE_LENGTH) {
+        Flight::jsonError(true, 'Message is too long', ERROR_TOO_LONG_MESSAGE);
+    }
+
+    if (!$dbSecurity->verifyUserApiKey($apiKey)) {
+        Flight::jsonError(true, 'Bad api key', ERROR_BAD_API_KEY);
+    }
+
+    if (!$dbSecurity->validateSignature(array($dialogId), $signature, $apiKey)) {
+        Flight::jsonError(true, 'Bad signature', ERROR_BAD_SIGNATURE);
+    }
+
+    if (!$dialogsHandler->isDialogExists($dialogId)) {
+        Flight::jsonError(true, 'Dialog does not exists', ERROR_DIALOG_NOT_EXISTS);
+    }
+
+    // Get user
+    $user = $usersHandler->get(true, array(), new Filter('api_key', $apiKey));
+
+    if ($user === NULL) {
+        Flight::jsonError(TRUE, 'User not found', ERROR_USER_NOT_FOUND);
+    }
+
+    $dialog = $dialogsHandler->get(TRUE, array(), new Filter('id', $dialogId));
+
+    if ($dialog === NULL) {
+        Flight::jsonError(TRUE, 'Dialog not found', ERROR_DIALOG_NOT_FOUND);
+    }
+
+    // Create new message
+    $createResult = $messagesHandler->create($user->getUUID(), $dialogsHandler->getMyPeer($user->getUUID()), $dialogId, $message);
+
+    if (!$createResult) {
+        Flight::jsonError(TRUE, 'Internal server error occurred', ERROR_INTERNAL_SERVER);
+    }
+
+    Flight::json(addErrorStatusToArray($createResult));
 });
 
 /**
@@ -640,13 +698,15 @@ Flight::route('POST /messages/send', function () {
  * @apiParam {String} api_key       User's API key.
  * @apiParam {String} signature     MD5 signature - id (path), secret.
  *
- * @apiSuccess {Boolean} error            Error status
- * @apiSuccess {String} error_message     Description of the error
- * @apiSuccess {Number} error_code        Identifier of the error
+ * @apiSuccess {Object} error                     Error information
+ * @apiSuccess {Boolean} error.error              Error status
+ * @apiSuccess {String} error.error_message       Description of the error
+ * @apiSuccess {Number} error.error_code          Identifier of the error
  *
- * @apiError {Boolean} error            Error status
- * @apiError {String} error_message     Description of the error
- * @apiError {Number} error_code        Identifier of the error
+ * @apiError {Object} error                     Error information
+ * @apiError {Boolean} error.error              Error status
+ * @apiError {String} error.error_message       Description of the error
+ * @apiError {Number} error.error_code          Identifier of the error
  */
 Flight::route('POST /messages/@id:[0-9]+/read', function ($messageId) {
     verifyRequiredParams(array('api_key', 'signature'));
@@ -694,13 +754,15 @@ Flight::route('POST /messages/@id:[0-9]+/read', function ($messageId) {
  * @apiParam {Boolean} important        0 - mark as common, 1 - mark as important.
  * @apiParam {String} signature         MD5 signature - message_id (path), important ,secret.
  *
- * @apiSuccess {Boolean} error            Error status
- * @apiSuccess {String} error_message     Description of the error
- * @apiSuccess {Number} error_code        Identifier of the error
+ * @apiSuccess {Object} error                     Error information
+ * @apiSuccess {Boolean} error.error              Error status
+ * @apiSuccess {String} error.error_message       Description of the error
+ * @apiSuccess {Number} error.error_code          Identifier of the error
  *
- * @apiError {Boolean} error            Error status
- * @apiError {String} error_message     Description of the error
- * @apiError {Number} error_code        Identifier of the error
+ * @apiError {Object} error                     Error information
+ * @apiError {Boolean} error.error              Error status
+ * @apiError {String} error.error_message       Description of the error
+ * @apiError {Number} error.error_code          Identifier of the error
  */
 Flight::route('POST /messages/@id:[0-9]+/important', function ($messageId) {
     verifyRequiredParams(array('api_key', 'important', 'signature'));

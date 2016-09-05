@@ -123,4 +123,25 @@ class MessagesHandler extends AbstractHandler
         else
             return false;
     }
+
+    public function create($senderUUID, $recipientUUID, $dialogId, $message)
+    {
+        $result = $this->sparrow
+            ->from($this->getTableName())
+            ->insert(array(
+                'sender_uuid' => $senderUUID,
+                'recipient_uuid' => $recipientUUID,
+                'dialog_id' => $dialogId,
+                'body' => $message,
+                'important' => 0,
+                'read_state' => 0,
+            ))
+            ->execute();
+
+        if (!$result) {
+            return false;
+        }
+
+        return $this->get(false, array(), new Filter('id', $this->sparrow->insert_id));
+    }
 }

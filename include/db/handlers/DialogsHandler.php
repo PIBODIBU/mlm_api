@@ -58,7 +58,7 @@ class DialogsHandler extends AbstractHandler
 
     public function createDialog($userUUID, $peerUUID)
     {
-        $sql = $this->sparrow
+        $result = $this->sparrow
             ->from($this->getTableName())
             ->insert(array(
                 'owner_uuid' => $userUUID,
@@ -66,8 +66,6 @@ class DialogsHandler extends AbstractHandler
             ))
             ->execute();
 
-        $result = $this->getConnection()->query($sql);
-        return $this->sparrow->insert_id;
         return $result ? $this->sparrow->insert_id : $result;
     }
 
@@ -154,5 +152,20 @@ class DialogsHandler extends AbstractHandler
             return true;
         else
             return false;
+    }
+
+    public function getMyPeer($userUUID)
+    {
+        $dialog = $this->get(TRUE, array(), new Filter('owner_uuid', $userUUID));
+        if (isset($dialog)) {
+            return $dialog->getPeerUUID();
+        }
+
+        $dialog = $this->get(TRUE, array(), new Filter('peer_uuid', $userUUID));
+        if (isset($dialog)) {
+            return $dialog->getOwnerUUID();
+        }
+
+        return '';
     }
 }

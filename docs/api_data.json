@@ -58,23 +58,30 @@
         "Error 4xx": [
           {
             "group": "Error 4xx",
-            "type": "Boolean",
+            "type": "Object",
             "optional": false,
             "field": "error",
+            "description": "<p>Error information</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error.error",
             "description": "<p>Error status</p>"
           },
           {
             "group": "Error 4xx",
             "type": "String",
             "optional": false,
-            "field": "error_message",
+            "field": "error.error_message",
             "description": "<p>Description of the error</p>"
           },
           {
             "group": "Error 4xx",
             "type": "Number",
             "optional": false,
-            "field": "error_code",
+            "field": "error.error_code",
             "description": "<p>Identifier of the error</p>"
           }
         ]
@@ -287,23 +294,30 @@
         "Error 4xx": [
           {
             "group": "Error 4xx",
-            "type": "Boolean",
+            "type": "Object",
             "optional": false,
             "field": "error",
+            "description": "<p>Error information</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error.error",
             "description": "<p>Error status</p>"
           },
           {
             "group": "Error 4xx",
             "type": "String",
             "optional": false,
-            "field": "error_message",
+            "field": "error.error_message",
             "description": "<p>Description of the error</p>"
           },
           {
             "group": "Error 4xx",
             "type": "Number",
             "optional": false,
-            "field": "error_code",
+            "field": "error.error_code",
             "description": "<p>Identifier of the error</p>"
           }
         ]
@@ -314,7 +328,7 @@
     "groupTitle": "Basic"
   },
   {
-    "type": "get",
+    "type": "post",
     "url": "/dialogs/create",
     "title": "Create dialog",
     "description": "<p>Create new dialog with specified user.</p>",
@@ -365,23 +379,30 @@
         "Error 4xx": [
           {
             "group": "Error 4xx",
-            "type": "Boolean",
+            "type": "Object",
             "optional": false,
             "field": "error",
+            "description": "<p>Error information</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error.error",
             "description": "<p>Error status</p>"
           },
           {
             "group": "Error 4xx",
             "type": "String",
             "optional": false,
-            "field": "error_message",
+            "field": "error.error_message",
             "description": "<p>Description of the error</p>"
           },
           {
             "group": "Error 4xx",
             "type": "Number",
             "optional": false,
-            "field": "error_code",
+            "field": "error.error_code",
             "description": "<p>Identifier of the error</p>"
           }
         ]
@@ -450,23 +471,30 @@
         "Error 4xx": [
           {
             "group": "Error 4xx",
-            "type": "Boolean",
+            "type": "Object",
             "optional": false,
             "field": "error",
+            "description": "<p>Error information</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error.error",
             "description": "<p>Error status</p>"
           },
           {
             "group": "Error 4xx",
             "type": "String",
             "optional": false,
-            "field": "error_message",
+            "field": "error.error_message",
             "description": "<p>Description of the error</p>"
           },
           {
             "group": "Error 4xx",
             "type": "Number",
             "optional": false,
-            "field": "error_code",
+            "field": "error.error_code",
             "description": "<p>Identifier of the error</p>"
           }
         ]
@@ -521,23 +549,30 @@
         "Error 4xx": [
           {
             "group": "Error 4xx",
-            "type": "Boolean",
+            "type": "Object",
             "optional": false,
             "field": "error",
+            "description": "<p>Error information</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error.error",
             "description": "<p>Error status</p>"
           },
           {
             "group": "Error 4xx",
             "type": "String",
             "optional": false,
-            "field": "error_message",
+            "field": "error.error_message",
             "description": "<p>Description of the error</p>"
           },
           {
             "group": "Error 4xx",
             "type": "Number",
             "optional": false,
-            "field": "error_code",
+            "field": "error.error_code",
             "description": "<p>Identifier of the error</p>"
           }
         ]
@@ -606,23 +641,30 @@
         "Error 4xx": [
           {
             "group": "Error 4xx",
-            "type": "Boolean",
+            "type": "Object",
             "optional": false,
             "field": "error",
+            "description": "<p>Error information</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error.error",
             "description": "<p>Error status</p>"
           },
           {
             "group": "Error 4xx",
             "type": "String",
             "optional": false,
-            "field": "error_message",
+            "field": "error.error_message",
             "description": "<p>Description of the error</p>"
           },
           {
             "group": "Error 4xx",
             "type": "Number",
             "optional": false,
-            "field": "error_code",
+            "field": "error.error_code",
             "description": "<p>Identifier of the error</p>"
           }
         ]
@@ -671,23 +713,30 @@
         "Success 200": [
           {
             "group": "Success 200",
-            "type": "Boolean",
+            "type": "Object",
             "optional": false,
             "field": "error",
+            "description": "<p>Error information</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error.error",
             "description": "<p>Error status</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "error_message",
+            "field": "error.error_message",
             "description": "<p>Description of the error</p>"
           },
           {
             "group": "Success 200",
             "type": "Number",
             "optional": false,
-            "field": "error_code",
+            "field": "error.error_code",
             "description": "<p>Identifier of the error</p>"
           }
         ]
@@ -698,23 +747,30 @@
         "Error 4xx": [
           {
             "group": "Error 4xx",
-            "type": "Boolean",
+            "type": "Object",
             "optional": false,
             "field": "error",
+            "description": "<p>Error information</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error.error",
             "description": "<p>Error status</p>"
           },
           {
             "group": "Error 4xx",
             "type": "String",
             "optional": false,
-            "field": "error_message",
+            "field": "error.error_message",
             "description": "<p>Description of the error</p>"
           },
           {
             "group": "Error 4xx",
             "type": "Number",
             "optional": false,
-            "field": "error_code",
+            "field": "error.error_code",
             "description": "<p>Identifier of the error</p>"
           }
         ]
@@ -756,23 +812,30 @@
         "Success 200": [
           {
             "group": "Success 200",
-            "type": "Boolean",
+            "type": "Object",
             "optional": false,
             "field": "error",
+            "description": "<p>Error information</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error.error",
             "description": "<p>Error status</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "error_message",
+            "field": "error.error_message",
             "description": "<p>Description of the error</p>"
           },
           {
             "group": "Success 200",
             "type": "Number",
             "optional": false,
-            "field": "error_code",
+            "field": "error.error_code",
             "description": "<p>Identifier of the error</p>"
           }
         ]
@@ -783,23 +846,30 @@
         "Error 4xx": [
           {
             "group": "Error 4xx",
-            "type": "Boolean",
+            "type": "Object",
             "optional": false,
             "field": "error",
+            "description": "<p>Error information</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error.error",
             "description": "<p>Error status</p>"
           },
           {
             "group": "Error 4xx",
             "type": "String",
             "optional": false,
-            "field": "error_message",
+            "field": "error.error_message",
             "description": "<p>Description of the error</p>"
           },
           {
             "group": "Error 4xx",
             "type": "Number",
             "optional": false,
-            "field": "error_code",
+            "field": "error.error_code",
             "description": "<p>Identifier of the error</p>"
           }
         ]
@@ -830,6 +900,13 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
+            "field": "dialog_id",
+            "description": "<p>Dialog to send message.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
             "field": "message",
             "description": "<p>Message body.</p>"
           },
@@ -838,23 +915,7 @@
             "type": "String",
             "optional": false,
             "field": "signature",
-            "description": "<p>MD5 signature - dialog_id/recipient_uuid, secret.</p>"
-          }
-        ],
-        "Switchable parameters (one must be filled)": [
-          {
-            "group": "Switchable parameters (one must be filled)",
-            "type": "String",
-            "optional": false,
-            "field": "dialog_id",
-            "description": "<p>Dialog to send message.</p>"
-          },
-          {
-            "group": "Switchable parameters (one must be filled)",
-            "type": "String",
-            "optional": false,
-            "field": "recipient_uuid",
-            "description": "<p>User to send message.</p>"
+            "description": "<p>MD5 signature - dialog_id, secret.</p>"
           }
         ]
       }
@@ -864,23 +925,79 @@
         "Success 200": [
           {
             "group": "Success 200",
-            "type": "Boolean",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Message id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "sender_uuid",
+            "description": "<p>Sender UUID</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "recipient_uuid",
+            "description": "<p>Recipient UUID</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "dialog_id",
+            "description": "<p>Message's dialog id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "important",
+            "description": "<p>Message important state</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "read_state",
+            "description": "<p>Message read state</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "body",
+            "description": "<p>Message body</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
             "optional": false,
             "field": "error",
+            "description": "<p>Error information</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error.error",
             "description": "<p>Error status</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "error_message",
+            "field": "error.error_message",
             "description": "<p>Description of the error</p>"
           },
           {
             "group": "Success 200",
             "type": "Number",
             "optional": false,
-            "field": "error_code",
+            "field": "error.error_code",
             "description": "<p>Identifier of the error</p>"
           }
         ]
@@ -891,23 +1008,30 @@
         "Error 4xx": [
           {
             "group": "Error 4xx",
-            "type": "Boolean",
+            "type": "Object",
             "optional": false,
             "field": "error",
+            "description": "<p>Error information</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error.error",
             "description": "<p>Error status</p>"
           },
           {
             "group": "Error 4xx",
             "type": "String",
             "optional": false,
-            "field": "error_message",
+            "field": "error.error_message",
             "description": "<p>Description of the error</p>"
           },
           {
             "group": "Error 4xx",
             "type": "Number",
             "optional": false,
-            "field": "error_code",
+            "field": "error.error_code",
             "description": "<p>Identifier of the error</p>"
           }
         ]
@@ -1027,23 +1151,30 @@
         "Success 200": [
           {
             "group": "Success 200",
-            "type": "Boolean",
+            "type": "Object",
             "optional": false,
             "field": "error",
+            "description": "<p>Error information</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error.error",
             "description": "<p>Error status</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "error_message",
+            "field": "error.error_message",
             "description": "<p>Description of the error</p>"
           },
           {
             "group": "Success 200",
             "type": "Number",
             "optional": false,
-            "field": "error_code",
+            "field": "error.error_code",
             "description": "<p>Identifier of the error</p>"
           }
         ]
@@ -1054,23 +1185,30 @@
         "Error 4xx": [
           {
             "group": "Error 4xx",
-            "type": "Boolean",
+            "type": "Object",
             "optional": false,
             "field": "error",
+            "description": "<p>Error information</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Boolean",
+            "optional": false,
+            "field": "error.error",
             "description": "<p>Error status</p>"
           },
           {
             "group": "Error 4xx",
             "type": "String",
             "optional": false,
-            "field": "error_message",
+            "field": "error.error_message",
             "description": "<p>Description of the error</p>"
           },
           {
             "group": "Error 4xx",
             "type": "Number",
             "optional": false,
-            "field": "error_code",
+            "field": "error.error_code",
             "description": "<p>Identifier of the error</p>"
           }
         ]
