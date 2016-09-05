@@ -37,12 +37,6 @@ Flight::map('jsonError', function ($error, $message, $error_code = NO_ERROR) {
         ));
 });
 
-Flight::route('/test/upload', function () {
-    $connection = DbConnect::connect();
-    $userHandler = new UsersHandler($connection);
-    $userHandler->uploadAvatar($_FILES['avatar'], $userHandler->getUserByUsername('username', true));
-});
-
 /**
  * @api {post} /register Register
  * @apiDescription Register in the app.
@@ -604,6 +598,37 @@ Flight::route('GET /messages/@dialog_id:[0-9]+', function ($dialogId) {
     }
 
     Flight::json($messagesHandler->getAll(array(), $limit, $offset, new Filter('dialog_id', $dialogId)));
+});
+
+/**
+ * @api {post} /messages/send          Send message
+ * @apiDescription Send message.
+ * @apiName PostSendMessage
+ * @apiGroup Messages
+ *
+ * @apiParam {String} api_key           User's API key.
+ * @apiParam (Switchable parameters (one must be filled))    {String} dialog_id         Dialog to send message.
+ * @apiParam (Switchable parameters (one must be filled))    {String} recipient_uuid    User to send message.
+ * @apiParam {String} message           Message body.
+ * @apiParam {String} signature         MD5 signature - dialog_id/recipient_uuid, secret.
+ *
+ * @apiSuccess {Boolean} error            Error status
+ * @apiSuccess {String} error_message     Description of the error
+ * @apiSuccess {Number} error_code        Identifier of the error
+ *
+ * @apiError {Boolean} error            Error status
+ * @apiError {String} error_message     Description of the error
+ * @apiError {Number} error_code        Identifier of the error
+ */
+Flight::route('POST /messages/send', function () {
+    verifyRequiredParams(array('api_key', 'signature', array('opt1', 'opt2')));
+
+    $connection = DbConnect::connect();
+    $messagesHandler = new MessagesHandler($connection);
+    $dialogsHandler = new DialogsHandler($connection);
+    $dbSecurity = new DB_Security($connection);
+
+    $dialogId = $_POST['dialog_id'];
 });
 
 /**

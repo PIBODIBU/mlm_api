@@ -15,6 +15,27 @@ function verifyRequiredParams($required_fields)
     }
 
     foreach ($required_fields as $field) {
+        // Array parser
+        if (is_array($field)) {
+            $passed = false;
+            foreach ($field as $arrayField) {
+                if (isset($request_params[$arrayField]) && strlen(trim($request_params[$arrayField])) > 0) {
+                    $passed = true;
+                    break;
+                }
+            }
+
+            if (!$passed) {
+                $error = true;
+                foreach ($field as $arrayField) {
+                    $error_fields .= $arrayField . '/';
+                }
+            }
+
+            continue;
+        }
+
+        // Normal param parser
         if (!isset($request_params[$field]) || strlen(trim($request_params[$field])) <= 0) {
             $error = true;
             $error_fields .= $field . ', ';
@@ -22,7 +43,7 @@ function verifyRequiredParams($required_fields)
     }
 
     if ($error) {
-        Flight::jsonError(true, 'Required field(s) ' . substr($error_fields, 0, -2) . ' is missing or empty');
+        Flight::jsonError(true, 'Required field(s) ' . substr($error_fields, 0, substr($error_fields, -2) == ', ' ? -2 : -1) . ' is missing or empty');
     }
 }
 
